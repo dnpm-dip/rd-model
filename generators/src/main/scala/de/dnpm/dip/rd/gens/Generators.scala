@@ -1,7 +1,7 @@
 package de.dnpm.dip.rd.gens
 
 
-
+import java.net.URI
 import java.time.LocalDate
 import de.ekut.tbi.generators.{
   Gen,
@@ -90,8 +90,12 @@ trait Generators
       id    <- Gen.of[Id[RDCase]]
       extId <- Gen.of[ExternalId[RDCase]]
       patient <- Gen.of[Id[Patient]]
-      gmId  <- Gen.of[ExternalId[RDCase]].map(Some(_))
-      f2gId <- Gen.of[ExternalId[RDCase]].map(Some(_))
+      gmId  <- Gen.of[ExternalId[RDCase]]
+                 .map(_.copy(system = Some(URI.create("https://www.gestaltmatcher.org/"))))
+                 .map(Some(_))
+      f2gId <- Gen.of[ExternalId[RDCase]]
+                 .map(_.copy(system = Some(URI.create("https://www.face2gene.com/"))))
+                 .map(Some(_))
       date  <- Gen.const(LocalDate.now).map(Some(_))
       referrer <- Gen.of[Clinician]
       diagnosis <- Gen.of[Id[RDDiagnosis]]
@@ -302,8 +306,8 @@ trait Generators
     } yield
       RDPatientRecord(
         patient,
-        cse,
         diag,
+        cse,
         Some(hpoTerms),
         ngsReport,
         Some(therapy)

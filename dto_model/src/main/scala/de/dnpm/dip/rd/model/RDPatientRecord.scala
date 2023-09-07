@@ -10,8 +10,8 @@ import play.api.libs.json.Json
 final case class RDPatientRecord
 (
   patient: Patient,
-  `case`: RDCase,
   diagnosis: RDDiagnosis,
+  `case`: RDCase,
   hpoTerms: Option[List[HPOTerm]],
   ngsReport: RDNGSReport,
   therapy: Option[RDTherapy]
