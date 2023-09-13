@@ -18,7 +18,10 @@ import de.dnpm.dip.model.{
   Patient,
   Diagnosis,
 }
-import play.api.libs.json.Json
+import play.api.libs.json.{
+  Json,
+  Format
+}
 
 
 
@@ -40,12 +43,12 @@ object RDDiagnosis
   object Category
   {
 
-    implicit val categorySystem =
+    implicit val categorySystem: Coding.System[Category] =
       Coding.System[Category]("rd/diagnosis/category")
 
-    implicit val categoryCodeSystem =
+    implicit val categoryCodeSystem: CodeSystem[Category] =
       CodeSystem[Category](
-        uri = Coding.System[Category].uri,
+//        uri = Coding.System[Category].uri,
         name = "Diagnosis-Category",
         title = Some("Diagnosis-Category"),
         version = None,
@@ -84,7 +87,8 @@ object RDDiagnosis
     val Unclear         = Value("unclear")
     val Unsolved        = Value("unsolved")
 
-    implicit val format = Json.formatEnum(this)
+    implicit val format: Format[Status.Value] = 
+      Json.formatEnum(this)
 
     override val display = {
       case Solved          => "Gelöst"
@@ -102,6 +106,6 @@ object RDDiagnosis
   }
 
 
-  implicit val format =
+  implicit val format: Format[RDDiagnosis] =
     Json.format[RDDiagnosis]
 }

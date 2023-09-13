@@ -18,14 +18,17 @@ import de.dnpm.dip.model.{
   Patient,
   Observation
 }
-import play.api.libs.json.Json
+import play.api.libs.json.{
+  Json,
+  Format
+}
 
 
 
 sealed trait HPO
 object HPO
 {
-  implicit val system =
+  implicit val system: Coding.System[HPO] =
     Coding.System[HPO]("https://hpo.jax.org")
 }
 
@@ -40,7 +43,7 @@ extends Observation[Coding[HPO]]
 
 object HPOTerm
 {
-   implicit val format =
+   implicit val format: Format[HPOTerm] =
     Json.format[HPOTerm]
 }
 
@@ -56,7 +59,7 @@ extends Observation[Float]
 
 object Autozygosity
 {
-   implicit val format =
+   implicit val format: Format[Autozygosity] =
     Json.format[Autozygosity]
 }
 
@@ -66,7 +69,7 @@ object Autozygosity
 sealed trait HGVS
 object HGVS
 {
-  implicit val hgvsSystem =
+  implicit val hgvsSystem: Coding.System[HGVS] =
     Coding.System[HGVS]("https://varnomen.hgvs.org")
 }
 
@@ -96,12 +99,11 @@ object Variant
   sealed trait ACMGClass
   object ACMGClass
   {
-    implicit val acmgSystem =
+    implicit val acmgSystem: Coding.System[ACMGClass] =
       Coding.System[ACMGClass]("https://www.acmg.net")
    
-    implicit val acmgCodeSystem =
+    implicit val acmgCodeSystem: CodeSystem[ACMGClass] =
       CodeSystem[ACMGClass](
-        uri = Coding.System[ACMGClass].uri,
         name = "ACMG-Class",
         title = Some("ACMG-Class"),
         version = None,
@@ -125,12 +127,11 @@ object Variant
   sealed trait Zygosity
   object Zygosity
   {
-    implicit val zygositySystem =
+    implicit val zygositySystem: Coding.System[Zygosity] =
       Coding.System[Zygosity]("rd/variant/zygosity")
   
-    implicit val zygosityCodeSystem =
+    implicit val zygosityCodeSystem: CodeSystem[Zygosity] =
       CodeSystem[Zygosity](
-        uri = Coding.System[Zygosity].uri,
         name = "Zygosity",
         title = Some("Zygosity"),
         version = None,
@@ -156,12 +157,11 @@ object Variant
   sealed trait DeNovo
   object DeNovo
   {
-    implicit val deNovoSystem =
+    implicit val deNovoSystem: Coding.System[DeNovo] =
       Coding.System[DeNovo]("rd/variant/de-novo")
   
-    implicit val deNovoCodeSystem =
+    implicit val deNovoCodeSystem: CodeSystem[DeNovo] =
       CodeSystem[DeNovo](
-        uri = Coding.System[DeNovo].uri,
         name = "de-novo",
         title = Some("de novo"),
         version = None,
@@ -185,12 +185,11 @@ object Variant
   sealed trait InheritanceMode
   object InheritanceMode
   {
-    implicit val inhModeSystem =
+    implicit val inhModeSystem: Coding.System[InheritanceMode] =
       Coding.System[InheritanceMode]("rd/variant/mode-of-inheritance")
   
-    implicit val inhModeCodeSystem =
+    implicit val inhModeCodeSystem: CodeSystem[InheritanceMode] =
       CodeSystem[InheritanceMode](
-        uri = Coding.System[InheritanceMode].uri,
         name = "mode-of-inheritance",
         title = Some("Mode of inheritance"),
         version = None,
@@ -215,12 +214,11 @@ object Variant
   sealed trait Significance
   object Significance
   {
-    implicit val significanceSystem =
+    implicit val significanceSystem: Coding.System[Significance] =
       Coding.System[Significance]("rd/variant/significance")
   
-    implicit val significanceCodeSystem =
+    implicit val significanceCodeSystem: CodeSystem[Significance] =
       CodeSystem[Significance](
-        uri = Coding.System[Significance].uri,
         name = "variant-significance",
         title = Some("Variant Significance"),
         version = None,
@@ -240,7 +238,7 @@ object Variant
   }
 
 
-  implicit val format =
+  implicit val format: Format[Variant] =
     Json.format[Variant]
   
 } // End object Variant

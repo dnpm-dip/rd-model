@@ -6,7 +6,10 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
 }
-import play.api.libs.json.Json
+import play.api.libs.json.{
+  Json,
+  Format
+}
 
 
 final case class RDTherapy
@@ -19,6 +22,6 @@ final case class RDTherapy
 object RDTherapy
 {
 
-  implicit val format =
+  implicit val format: Format[RDTherapy] =
     Json.format[RDTherapy]
 }

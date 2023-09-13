@@ -16,7 +16,10 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
 }
-import play.api.libs.json.Json
+import play.api.libs.json.{
+  Json,
+  Format
+}
 
 
 
@@ -27,7 +30,7 @@ final case class Lab
 
 object Lab
 {
-  implicit val format =
+  implicit val format: Format[Lab] =
     Json.format[Lab]
 }
 
@@ -51,12 +54,12 @@ object RDNGSReport
   object Type
   {
 
-    implicit val typeSystem =
+    implicit val typeSystem: Coding.System[Type] =
       Coding.System[Type]("rd/ngs-report/type")
 
-    implicit val typeCodeSystem =
+    implicit val typeCodeSystem: CodeSystem[Type] =
       CodeSystem[Type](
-        uri = Coding.System[Type].uri,
+//        uri = Coding.System[Type].uri,
         name = "NGS-Report-Type",
         title = Some("NGS-Report Type"),
         version = None,
@@ -83,10 +86,10 @@ object RDNGSReport
     kit: String
   )
 
-  implicit val formatMetaInfo =
+  implicit val formatMetaInfo: Format[MetaInfo] =
     Json.format[MetaInfo]
 
-  implicit val format =
+  implicit val format: Format[RDNGSReport] =
     Json.format[RDNGSReport]
   
 }

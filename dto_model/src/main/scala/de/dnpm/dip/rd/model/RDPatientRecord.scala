@@ -1,10 +1,11 @@
 package de.dnpm.dip.rd.model
 
 
-import de.dnpm.dip.model.{
-  Patient,
+import de.dnpm.dip.model.Patient
+import play.api.libs.json.{
+  Json,
+  Format
 }
-import play.api.libs.json.Json
 
 
 final case class RDPatientRecord
@@ -19,7 +20,8 @@ final case class RDPatientRecord
 
 object RDPatientRecord
 {
-  implicit val format =
+
+  implicit val format: Format[RDPatientRecord] =
     Json.format[RDPatientRecord]
 
 }

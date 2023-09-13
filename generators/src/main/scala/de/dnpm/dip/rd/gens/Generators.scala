@@ -141,7 +141,7 @@ trait Generators
       )
 
 
-  implicit val genHGNCCoding =
+  implicit val genHGNCCoding: Gen[Coding[HGNC]] =
     Gen.oneOf(
       Seq(
         "HGNC:20" -> "AARS1",
