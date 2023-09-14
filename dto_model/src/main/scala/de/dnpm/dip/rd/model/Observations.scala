@@ -128,7 +128,7 @@ object Variant
   object Zygosity
   {
     implicit val zygositySystem: Coding.System[Zygosity] =
-      Coding.System[Zygosity]("rd/variant/zygosity")
+      Coding.System[Zygosity]("dnpm-dip/rd/variant/zygosity")
   
     implicit val zygosityCodeSystem: CodeSystem[Zygosity] =
       CodeSystem[Zygosity](
@@ -158,7 +158,7 @@ object Variant
   object DeNovo
   {
     implicit val deNovoSystem: Coding.System[DeNovo] =
-      Coding.System[DeNovo]("rd/variant/de-novo")
+      Coding.System[DeNovo]("dnpm-dip/rd/variant/de-novo")
   
     implicit val deNovoCodeSystem: CodeSystem[DeNovo] =
       CodeSystem[DeNovo](
@@ -186,7 +186,7 @@ object Variant
   object InheritanceMode
   {
     implicit val inhModeSystem: Coding.System[InheritanceMode] =
-      Coding.System[InheritanceMode]("rd/variant/mode-of-inheritance")
+      Coding.System[InheritanceMode]("dnpm-dip/rd/variant/mode-of-inheritance")
   
     implicit val inhModeCodeSystem: CodeSystem[InheritanceMode] =
       CodeSystem[InheritanceMode](
@@ -215,7 +215,7 @@ object Variant
   object Significance
   {
     implicit val significanceSystem: Coding.System[Significance] =
-      Coding.System[Significance]("rd/variant/significance")
+      Coding.System[Significance]("dnpm-dip/rd/variant/significance")
   
     implicit val significanceCodeSystem: CodeSystem[Significance] =
       CodeSystem[Significance](

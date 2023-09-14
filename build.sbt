@@ -58,7 +58,7 @@ lazy val generators = project
 
 lazy val dependencies =
   new {
-    val scalatest   = "org.scalatest"  %% "scalatest"   % "3.1.1" % Test
+    val scalatest   = "org.scalatest"  %% "scalatest"   % "3.2.17" % Test
     val core        = "de.dnpm.dip"    %% "core"        % "1.0-SNAPSHOT"
     val generators  = "de.ekut.tbi"    %% "generators"  % "0.1-SNAPSHOT"
   }

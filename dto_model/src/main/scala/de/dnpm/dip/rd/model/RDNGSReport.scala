@@ -55,7 +55,7 @@ object RDNGSReport
   {
 
     implicit val typeSystem: Coding.System[Type] =
-      Coding.System[Type]("rd/ngs-report/type")
+      Coding.System[Type]("dnpm-dip/rd/ngs-report/type")
 
     implicit val typeCodeSystem: CodeSystem[Type] =
       CodeSystem[Type](

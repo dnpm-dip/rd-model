@@ -44,11 +44,10 @@ object RDDiagnosis
   {
 
     implicit val categorySystem: Coding.System[Category] =
-      Coding.System[Category]("rd/diagnosis/category")
+      Coding.System[Category]("dnpm-dip/rd/diagnosis/category")
 
     implicit val categoryCodeSystem: CodeSystem[Category] =
       CodeSystem[Category](
-//        uri = Coding.System[Category].uri,
         name = "Diagnosis-Category",
         title = Some("Diagnosis-Category"),
         version = None,
@@ -78,7 +77,7 @@ object RDDiagnosis
 
 
   object Status
-  extends CodedEnum("rd/diagnosis/status")
+  extends CodedEnum("dnpm-dip/rd/diagnosis/status")
   with DefaultCodeSystem
   {
 
