@@ -109,7 +109,7 @@ object Variant
         version = None,
         "pathogenic"        -> "Pathogenic",
         "likely-pathogenic" -> "Likely pathogenic",
-        "unclear          " -> "Unclear",
+        "unclear"           -> "Unclear",
         "likely-benign"     -> "Likely benign",
         "benign"            -> "Benign"
       )
