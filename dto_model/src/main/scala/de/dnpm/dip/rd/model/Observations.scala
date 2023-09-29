@@ -25,14 +25,6 @@ import play.api.libs.json.{
 
 
 
-sealed trait HPO
-object HPO
-{
-  implicit val system: Coding.System[HPO] =
-    Coding.System[HPO]("https://hpo.jax.org")
-}
-
-
 final case class HPOTerm
 (
   id: Id[HPOTerm],

@@ -22,6 +22,7 @@ lazy val global = project
   )
   .aggregate(
      dto_model,
+     hpo,
      generators
   )
 
@@ -34,6 +35,18 @@ lazy val dto_model = project
       dependencies.core,
       dependencies.scalatest
     )
+  )
+
+lazy val hpo = project
+  .settings(
+    name := "hp-ontology",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scalatest
+    )
+  )
+  .dependsOn(
+    dto_model
   )
 
 
