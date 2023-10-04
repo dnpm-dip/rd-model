@@ -47,8 +47,6 @@ class Tests extends AnyFlatSpec
 
   it must "contain non-empty list of entries" in {
 
-//    print(prettyPrint(toJson(hpo)))
-
     hpo.concepts must not be (empty)
   }
 
