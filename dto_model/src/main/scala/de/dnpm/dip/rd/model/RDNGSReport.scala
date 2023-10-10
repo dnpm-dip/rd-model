@@ -59,7 +59,6 @@ object RDNGSReport
 
     implicit val typeCodeSystem: CodeSystem[Type] =
       CodeSystem[Type](
-//        uri = Coding.System[Type].uri,
         name = "NGS-Report-Type",
         title = Some("NGS-Report Type"),
         version = None,

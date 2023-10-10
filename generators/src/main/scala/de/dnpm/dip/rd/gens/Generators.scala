@@ -112,15 +112,28 @@ trait Generators
       )
 
 
+/*
+  implicit val genHpoCoding: Gen[Coding[HPO]] =
+    Gen.intsBetween(0,200000)
+      .map(c => Coding[HPO](s"DummyHP:$c"))
+*/
+
+  implicit val genHpoCoding: Gen[Coding[HPO]] =
+    Gen.oneOf(
+      "HP:0100861",
+      "HP:0100863",
+      "HP:0100864",
+      "HP:0100869",
+      "HP:0100871",
+      "HP:0100877"
+    )
+    .map(Coding[HPO](_))
+
   implicit val genHPOTerm: Gen[HPOTerm] =
     for {
-      id  <- Gen.of[Id[HPOTerm]]
-      pat <- Gen.of[Id[Patient]]
-      value <-
-        for {
-          pref <- Gen.oneOf("ORPHA","OMIM")
-          int  <- Gen.intsBetween(0,400000)
-        } yield Coding[HPO](s"$pref:$int")
+      id    <- Gen.of[Id[HPOTerm]]
+      pat   <- Gen.of[Id[Patient]]
+      value <- Gen.of[Coding[HPO]]
     } yield
       HPOTerm(
         id,
@@ -128,10 +141,11 @@ trait Generators
         value
       )
 
+
   implicit val genAutozygosity: Gen[Autozygosity] =
     for {
-      id  <- Gen.of[Id[Autozygosity]]
-      pat <- Gen.of[Id[Patient]]
+      id    <- Gen.of[Id[Autozygosity]]
+      pat   <- Gen.of[Id[Patient]]
       value <- Gen.floats
     } yield
       Autozygosity(
