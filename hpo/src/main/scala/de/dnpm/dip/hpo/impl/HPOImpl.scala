@@ -58,6 +58,10 @@ object HPOImpl
   }
 
 
+  //TODO: Add OntologyLoader that automatically downloads the JSON HPO from external URL
+
+
+
   private val ontologyLoader: OntologyLoader =
     OntologyLoader
       .getInstance

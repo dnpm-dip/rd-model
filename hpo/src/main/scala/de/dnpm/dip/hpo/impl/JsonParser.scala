@@ -30,9 +30,6 @@ object JsonParser
   object Id
   {
 
-//  private val regex =
-//    raw"(HP_\d+)".r.unanchored
-
     def unapply(id: String): Option[Code[HPO]] =
       Some(
         Code[HPO](
@@ -64,6 +61,7 @@ object JsonParser
               .atTime(LocalTime.MIN)
         }
 
+    // Load only nodes of type "CLASS" for now
     val classes =
       (graph \ "nodes").as[JsArray]
         .value
@@ -88,17 +86,25 @@ object JsonParser
 
           val Id(code) = id 
 
+          val superClasses =
+            edges.collect {
+              case edge if (edge \ "sub").as[String] == id =>
+                (edge \ "obj").as[String]
+            }
+            .toSet
+
           CodeSystem.Concept[HPO](
             code = code,
             display = (js \ "lbl").as[String],
             version = Some(version),
-            properties = Map.empty,
-            parent = 
-              edges.collectFirst {
-                case edge if (edge \ "sub").as[String] == id =>
-                  val Id(parent) = (edge \ "obj").as[String]
-                  parent
-              },
+            properties =
+              Map(
+                HPO.Type.name         -> Set((js \ "type").as[String]),
+                HPO.Definition.name   -> (js \ "meta" \ "definition" \ "val").asOpt[String].toSet,
+                HPO.SuperClasses.name -> superClasses
+              ),
+            // Leave single parent undefined, as a node can have multiple super-classes (accessible via properties)
+            parent = None,
             children =
               Some(
                 edges.collect {

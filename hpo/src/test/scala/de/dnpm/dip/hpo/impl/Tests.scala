@@ -1,24 +1,22 @@
 package de.dnpm.dip.hpo.impl
 
 
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers._
+import org.scalatest.Inspectors._
 import cats.Id
 import de.dnpm.dip.rd.model.HPO
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystemProvider
 }
-/*
-import play.api.libs.json.Json.{
-  toJson,
-  prettyPrint
-}
-*/
+
 
 class Tests extends AnyFlatSpec
 {
+
+  import HPO.extensions._
+
 
   val ontology =
     HPO.Ontology
@@ -26,6 +24,7 @@ class Tests extends AnyFlatSpec
 
   lazy val hpo =
     ontology.get.latest
+
 
 
   "HPO" must "have been successfully loaded as CodeSystemProvider[Any]" in {
@@ -38,7 +37,7 @@ class Tests extends AnyFlatSpec
   }
 
 
-  it must "have been successfully loaded as CodeSystem[HPO]" in {
+  it must "have been successfully loaded as HPO.Ontology" in {
     
     ontology.isSuccess mustBe true
 
@@ -48,6 +47,30 @@ class Tests extends AnyFlatSpec
   it must "contain non-empty list of entries" in {
 
     hpo.concepts must not be (empty)
+
   }
+
+
+
+  it must "pass check that node type is always defined" in {
+
+    all (hpo.concepts.map(_.getType)) must be (defined)
+
+  }
+
+
+  it must "pass check that definition is present on some nodes" in {
+
+    atLeast (1, hpo.concepts.map(_.definition)) must be (defined)
+
+  }
+
+
+  it must "pass check that nodes can have mutiple super-classes" in {
+
+    atLeast (1, hpo.concepts.map(_.superClasses.size)) must be > 1
+
+  }
+
 
 }
