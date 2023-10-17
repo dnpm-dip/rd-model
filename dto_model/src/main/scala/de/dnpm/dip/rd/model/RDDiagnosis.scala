@@ -3,6 +3,7 @@ package de.dnpm.dip.rd.model
 
 import java.time.LocalDate
 import cats.Applicative
+import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
@@ -17,6 +18,7 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   Diagnosis,
+  Age
 }
 import play.api.libs.json.{
   Json,
@@ -30,7 +32,8 @@ final case class RDDiagnosis
   id: Id[RDDiagnosis],
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
-  category: Coding[RDDiagnosis.Category],
+  categories: NonEmptyList[Coding[RDDiagnosis.Category]],
+  onsetAge: Option[Age],
   status: Coding[RDDiagnosis.Status.Value]
 )
 extends Diagnosis
@@ -65,7 +68,7 @@ object RDDiagnosis
         .map(c => (c,c)): _*
       )
 
-    object Provider extends SingleCodeSystemProvider[Category](categoryCodeSystem)
+    object Provider extends SingleCodeSystemProvider[Category]
 
     final class ProviderSPI extends CodeSystemProviderSPI
     {
@@ -104,6 +107,8 @@ object RDDiagnosis
 
   }
 
+
+  import de.dnpm.dip.util.json._
 
   implicit val format: Format[RDDiagnosis] =
     Json.format[RDDiagnosis]

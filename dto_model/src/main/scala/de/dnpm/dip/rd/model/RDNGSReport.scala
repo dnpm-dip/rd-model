@@ -68,7 +68,7 @@ object RDNGSReport
         "array"  -> "Array"
       )
 
-    object Provider extends SingleCodeSystemProvider[Type](typeCodeSystem)
+    object Provider extends SingleCodeSystemProvider[Type]
 
     final class ProviderSPI extends CodeSystemProviderSPI
     {

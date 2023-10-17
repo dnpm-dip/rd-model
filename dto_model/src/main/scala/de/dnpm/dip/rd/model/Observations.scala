@@ -77,9 +77,10 @@ final case class Variant
   cDNAChange: Option[Coding[HGVS]],
   gDNAChange: Option[Coding[HGVS]],
   proteinChange: Option[Coding[HGVS]],
-  acmgClass: Option[Coding[Variant.ACMGClass]],
-  zygosity: Option[Coding[Variant.Zygosity]],
-  deNovo: Option[Coding[Variant.DeNovo]],
+  acmgClass: Coding[Variant.ACMGClass],
+  acmgCriteria: Option[Set[Coding[Variant.ACMGCriteria]]],
+  zygosity: Coding[Variant.Zygosity],
+  segregationAnalysis: Option[Coding[Variant.SegregationAnalysis]],
   modeOfInheritance: Option[Coding[Variant.InheritanceMode]],
   significance: Option[Coding[Variant.Significance]],
   clinVarAccessionID: Option[Set[String]]
@@ -91,10 +92,10 @@ object Variant
   sealed trait ACMGClass
   object ACMGClass
   {
-    implicit val acmgSystem: Coding.System[ACMGClass] =
-      Coding.System[ACMGClass]("https://www.acmg.net")
+    implicit val acmgClassSystem: Coding.System[ACMGClass] =
+      Coding.System[ACMGClass]("https://www.acmg.net/class")
    
-    implicit val acmgCodeSystem: CodeSystem[ACMGClass] =
+    implicit val acmgClassCodeSystem: CodeSystem[ACMGClass] =
       CodeSystem[ACMGClass](
         name = "ACMG-Class",
         title = Some("ACMG-Class"),
@@ -106,7 +107,61 @@ object Variant
         "benign"            -> "Benign"
       )
   
-    object Provider extends SingleCodeSystemProvider[ACMGClass](acmgCodeSystem)
+    object Provider extends SingleCodeSystemProvider[ACMGClass]
+  
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
+      
+  }
+
+  sealed trait ACMGCriteria
+  object ACMGCriteria
+  {
+    implicit val acmgCriteriaSystem: Coding.System[ACMGCriteria] =
+      Coding.System[ACMGCriteria]("https://www.acmg.net/criteria")
+   
+    implicit val acmgCriteriaCodeSystem: CodeSystem[ACMGCriteria] =
+      CodeSystem[ACMGCriteria](
+        name = "ACMG-Criteria",
+        title = Some("ACMG-Criteria"),
+        version = None,
+        Seq(
+          "PVS1",
+          "PS1",
+          "PS2",
+          "PS3",
+          "PS4",
+          "PM1",
+          "PM2",
+          "PM3",
+          "PM4",
+          "PM5",
+          "PM6",
+          "PP1",
+          "PP2",
+          "PP3",
+          "PP4",
+          "PP5",
+          "BA1",
+          "BS1",
+          "BS2",
+          "BS3",
+          "BS4",
+          "BP1",
+          "BP2",
+          "BP3",
+          "BP4",
+          "BP5",
+          "BP6",
+          "BP7"
+        )
+        .map(c => (c,c)): _*
+    )
+  
+    object Provider extends SingleCodeSystemProvider[ACMGCriteria]
   
     final class ProviderSPI extends CodeSystemProviderSPI
     {
@@ -135,7 +190,7 @@ object Variant
         "heteroplasmic" -> "Heteroplasmic"
       )
   
-    object Provider extends SingleCodeSystemProvider(zygosityCodeSystem)
+    object Provider extends SingleCodeSystemProvider[Zygosity]
   
     final class ProviderSPI extends CodeSystemProviderSPI
     {
@@ -146,24 +201,24 @@ object Variant
   }
 
 
-  sealed trait DeNovo
-  object DeNovo
+  sealed trait SegregationAnalysis
+  object SegregationAnalysis
   {
-    implicit val deNovoSystem: Coding.System[DeNovo] =
-      Coding.System[DeNovo]("dnpm-dip/rd/variant/de-novo")
+    implicit val segregationAnalysisSystem: Coding.System[SegregationAnalysis] =
+      Coding.System[SegregationAnalysis]("dnpm-dip/rd/variant/segregation-analysis")
   
-    implicit val deNovoCodeSystem: CodeSystem[DeNovo] =
-      CodeSystem[DeNovo](
-        name = "de-novo",
-        title = Some("de novo"),
+    implicit val segregationAnalysisCodeSystem: CodeSystem[SegregationAnalysis] =
+      CodeSystem[SegregationAnalysis](
+        name = "segregation-analysis",
+        title = Some("Segregation Analysis"),
         version = None,
-        "yes" -> "Yes",
-        "no" -> "No",
-        "from-father" -> "Transmitted from father",
-        "from-mother" -> "Transmitted from mother"
+        "not-performed" -> "not performed",
+        "de-novo"       -> "de novo",
+        "from-father"   -> "Transmitted from father",
+        "from-mother"   -> "Transmitted from mother"
       )
   
-    object Provider extends SingleCodeSystemProvider(deNovoCodeSystem)
+    object Provider extends SingleCodeSystemProvider[SegregationAnalysis]
   
     final class ProviderSPI extends CodeSystemProviderSPI
     {
@@ -192,7 +247,7 @@ object Variant
         "unclear"       -> "Unclear"
       )
   
-    object Provider extends SingleCodeSystemProvider(inhModeCodeSystem)
+    object Provider extends SingleCodeSystemProvider[InheritanceMode]
   
     final class ProviderSPI extends CodeSystemProviderSPI
     {
@@ -219,7 +274,7 @@ object Variant
         "candidate" -> "Candidate"
       )
   
-    object Provider extends SingleCodeSystemProvider(significanceCodeSystem)
+    object Provider extends SingleCodeSystemProvider[Significance]
   
     final class ProviderSPI extends CodeSystemProviderSPI
     {

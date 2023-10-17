@@ -22,8 +22,9 @@ class CodeSystemTests extends AnyFlatSpec
         Coding.System[RDDiagnosis.Category].uri,
         Coding.System[RDNGSReport.Type].uri,
         Coding.System[Variant.ACMGClass].uri,
+        Coding.System[Variant.ACMGCriteria].uri,
         Coding.System[Variant.Zygosity].uri,
-        Coding.System[Variant.DeNovo].uri,
+        Coding.System[Variant.SegregationAnalysis].uri,
         Coding.System[Variant.InheritanceMode].uri,
         Coding.System[Variant.Significance].uri,
       )

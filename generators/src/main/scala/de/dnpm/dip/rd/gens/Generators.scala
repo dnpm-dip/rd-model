@@ -3,6 +3,7 @@ package de.dnpm.dip.rd.gens
 
 import java.net.URI
 import java.time.LocalDate
+import cats.data.NonEmptyList
 import de.ekut.tbi.generators.{
   Gen,
 }
@@ -14,6 +15,7 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.model.{
   Id,
+  Age,
   ExternalId,
   Reference,
   Gender,
@@ -74,13 +76,15 @@ trait Generators
       patient  <- Gen.of[Id[Patient]]
       date     <- Gen.const(LocalDate.now).map(Some(_))
       category <- Gen.of[Coding[RDDiagnosis.Category]]
+      onsetAge <- Gen.intsBetween(12,42).map(Age(_))
       status   <- Gen.of[Coding[RDDiagnosis.Status.Value]]
     } yield
       RDDiagnosis(
         id,
         Reference(patient,None),
         date,
-        category,
+        NonEmptyList.one(category),
+        Some(onsetAge),
         status
       )
 
@@ -102,7 +106,7 @@ trait Generators
     } yield
       RDCase(
         id,
-        extId,
+        Some(extId),
         gmId,
         f2gId,
         Reference(patient,None),
@@ -111,12 +115,6 @@ trait Generators
         Reference(diagnosis,None)
       )
 
-
-/*
-  implicit val genHpoCoding: Gen[Coding[HPO]] =
-    Gen.intsBetween(0,200000)
-      .map(c => Coding[HPO](s"DummyHP:$c"))
-*/
 
   implicit val genHpoCoding: Gen[Coding[HPO]] =
     Gen.oneOf(
@@ -211,13 +209,18 @@ trait Generators
       gene <- Gen.of[Coding[HGNC]]
       loe <- Gen.const("Level of evidence")
       iscn <- Gen.const("Some ISCN description")
-      pmid <- Gen.ints.map(_.toString)
+      pmid <- Gen.ints.map(_.abs.toString)
       cDNAChg <- Gen.oneOf(cDNAChanges)
       gDNAChg <- Gen.oneOf(gDNAChanges)
       proteinChg <- Gen.oneOf(proteinChanges)
       acmgClass <- Gen.of[Coding[Variant.ACMGClass]]
+      acmgCriteria <-
+        Gen.list(
+          Gen.intsBetween(1,4),
+          Gen.of[Coding[Variant.ACMGCriteria]]
+        )
       zygosity <- Gen.of[Coding[Variant.Zygosity]]
-      deNovo <- Gen.of[Coding[Variant.DeNovo]]
+      segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis]]
       inh <- Gen.of[Coding[Variant.InheritanceMode]]
       signif <- Gen.of[Coding[Variant.Significance]]
       clinVar <- Gen.uuidStrings.map(Set(_))
@@ -232,9 +235,10 @@ trait Generators
         Some(cDNAChg),
         Some(gDNAChg),
         Some(proteinChg),
-        Some(acmgClass),
-        Some(zygosity),
-        Some(deNovo),
+        acmgClass,
+        Some(acmgCriteria.toSet),
+        zygosity,
+        Some(segAnalysis),
         Some(inh),
         Some(signif),
         Some(clinVar)
@@ -322,8 +326,8 @@ trait Generators
         patient,
         diag,
         cse,
-        Some(hpoTerms),
-        ngsReport,
+        NonEmptyList.fromListUnsafe(hpoTerms),
+        NonEmptyList.one(ngsReport),
         Some(therapy)
       )
 

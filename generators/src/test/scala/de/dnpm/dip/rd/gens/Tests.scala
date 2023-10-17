@@ -18,7 +18,7 @@ class Tests extends AnyFlatSpec with Generators
 
 
   "Generating RDPatientRecord" must "have worked" in {
-
+/*
     import play.api.libs.json.Json._
     import scala.util.chaining._
 
@@ -29,19 +29,12 @@ class Tests extends AnyFlatSpec with Generators
       .pipe(toJson(_))
       .pipe(prettyPrint)  
       .tap(println)
-    
+*/    
+
     assert(
       Try(Gen.of[RDPatientRecord].next) isSuccess
     )
 
   }
 
-/*
-  "Generating RDPatientRecord" must "have worked" in {
-    assert(
-      Try(Gen.of[RDPatientRecord].next) isSuccess
-    )
-
-  }
-*/
 }

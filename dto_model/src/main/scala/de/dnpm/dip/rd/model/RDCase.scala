@@ -30,7 +30,7 @@ object Clinician
 final case class RDCase
 (
   id: Id[RDCase],
-  externalId: ExternalId[RDCase],
+  externalId: Option[ExternalId[RDCase]],
   gestaltMatcherId: Option[ExternalId[RDCase]], 
   face2geneId: Option[ExternalId[RDCase]], 
   patient: Reference[Patient],
