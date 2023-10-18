@@ -23,6 +23,7 @@ lazy val global = project
   .aggregate(
      dto_model,
      hpo,
+     orphanet,
      generators
   )
 
@@ -42,6 +43,19 @@ lazy val hpo = project
     name := "hp-ontology",
     settings,
     libraryDependencies ++= Seq(
+      dependencies.scalatest
+    )
+  )
+  .dependsOn(
+    dto_model
+  )
+
+lazy val orphanet = project
+  .settings(
+    name := "orphanet-ordo",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scala_xml,
       dependencies.scalatest
     )
   )
@@ -71,9 +85,10 @@ lazy val generators = project
 
 lazy val dependencies =
   new {
-    val scalatest   = "org.scalatest"  %% "scalatest"   % "3.2.17" % Test
-    val core        = "de.dnpm.dip"    %% "core"        % "1.0-SNAPSHOT"
-    val generators  = "de.ekut.tbi"    %% "generators"  % "1.0-SNAPSHOT"
+    val scalatest   = "org.scalatest"           %% "scalatest"   % "3.2.17" % Test
+    val scala_xml   = "org.scala-lang.modules"  %% "scala-xml"   % "2.0.1"
+    val core        = "de.dnpm.dip"             %% "core"        % "1.0-SNAPSHOT"
+    val generators  = "de.ekut.tbi"             %% "generators"  % "1.0-SNAPSHOT"
   }
 
 

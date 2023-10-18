@@ -109,19 +109,6 @@ object JsonParser
             .pipe(Option(_))
             .pipe(_.filter(_.nonEmpty))
 
-/*              
-          val superClasses =
-            Option(
-              edges.collect {
-                case edge if (edge \ "sub").as[String] == id =>
-                  val HpoId(c) = (edge \ "obj").as[String]
-                  c.value
-              }
-              .toSet
-            )
-            .filter(_.nonEmpty)
-*/
-
           CodeSystem.Concept[HPO](
             code = code,
             display = (js \ "lbl").as[String],
