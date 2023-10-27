@@ -1,4 +1,4 @@
-package de.dnpm.dip.hpo.impl
+package de.dnpm.dip.orphanet.impl
 
 
 import org.scalatest.flatspec.AnyFlatSpec
@@ -27,7 +27,7 @@ class Tests extends AnyFlatSpec
 
 
 
-  "Orphanet.Ordo" must "have been successfully loaded as CodeSystemProvider[Any]" in {
+  "ORDO" must "have been successfully loaded as CodeSystemProvider[Any]" in {
 
     CodeSystemProvider
       .getInstances[Id]
@@ -36,20 +36,56 @@ class Tests extends AnyFlatSpec
 
   }
 
-
-  "ORDO" must "have been correctly parsed as CodeSystem[Orphanet]" in {
+  "CodeSystem[Orphanet]" must "have a defined version" in {
 
     ordo.version must be (defined)
 
+  }
+
+  it must "contain non-empty concept list" in {
+
     ordo.concepts must not be empty
 
+  }
+
+  it must "have defined code and display values on all concepts" in {
+
     all (ordo.concepts.map(_.code.value)) must not be empty
+    all (ordo.concepts.map(_.display.trim)) must not be empty
+
+  }
+
+
+  it must "contain ICD-10-Codes on some concepts" in {
 
     atLeast (1, ordo.concepts.map(_.icd10Code)) must be (defined)
 
+  }
+
+
+  it must "contain ICD-11-Codes on some concepts" in {
+
+    atLeast (1, ordo.concepts.map(_.icd11Code)) must be (defined)
+
+  }
+
+
+  it must "contain 'alternative terms' on some concepts" in {
+
     atLeast (1, ordo.concepts.map(_.alternativeTerms)) must not be empty
 
-//    atLeast (1, ordo.concepts.flatMap(_.icd10Code).map(_.value)) must contain ('+')
+  }
+
+  it must "contain 'super-classes' on some concepts" in {
+
+    atLeast (1, ordo.concepts.map(_.superClasses)) must not be empty
+
+  }
+
+  it must "contain 'sub-classes' (children) on some concepts" in {
+
+    atLeast (1, ordo.concepts.map(_.children)) must not be empty
+
   }
 
 

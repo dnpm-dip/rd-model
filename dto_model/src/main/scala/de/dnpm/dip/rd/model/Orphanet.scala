@@ -8,7 +8,10 @@ import de.dnpm.dip.coding.{
   CodeSystem,
   CodeSystemProvider,
 }
-import de.dnpm.dip.coding.icd.ICD10GM
+import de.dnpm.dip.coding.icd.{
+  ICD10GM,
+  ICD11
+}
 import de.dnpm.dip.util.{
   SPIF,
   SPILoaderF
@@ -27,14 +30,12 @@ object Orphanet extends CodeSystem.Publisher[Orphanet]
   val filters: List[CodeSystem.Filter[Orphanet]] =
     List.empty
 
-/*
   val SuperClasses =
     CodeSystem.Property[String](
       name = "SuperClasses",
       description = Some("Super-classes of the ORDO concept/class"),
       valueSet = None
     )
-*/
 
   val AlternativeTerms =
     CodeSystem.Property[String](
@@ -50,12 +51,20 @@ object Orphanet extends CodeSystem.Publisher[Orphanet]
       valueSet = None
     )
 
+  val ICD11Code =
+    CodeSystem.Property[String](
+      name = "ICD-11-Code",
+      description = Some("Corresponding ICD-11 code of the ORDO concept"),
+      valueSet = None
+    )
+
 
   override val properties: List[CodeSystem.Property] =
     List(
-//      SuperClasses,
+      SuperClasses,
       AlternativeTerms,      
-      ICD10Code
+      ICD10Code,
+      ICD11Code
     )
 
 
@@ -64,12 +73,11 @@ object Orphanet extends CodeSystem.Publisher[Orphanet]
 
     implicit class OrphanetConceptProperties(val concept: CodeSystem.Concept[Orphanet]) extends AnyVal
     {
-/*
+
       def superClasses: Set[Code[Orphanet]] =
         concept.get(SuperClasses)
           .getOrElse(Set.empty)
           .map(Code[Orphanet](_))
-*/
 
       def alternativeTerms: Set[String] =
         concept.get(AlternativeTerms)
@@ -79,6 +87,11 @@ object Orphanet extends CodeSystem.Publisher[Orphanet]
         concept.get(ICD10Code)
           .flatMap(_.headOption)
           .map(Code[ICD10GM](_))
+
+      def icd11Code: Option[Code[ICD11]] =
+        concept.get(ICD11Code)
+          .flatMap(_.headOption)
+          .map(Code[ICD11](_))
     }
 
   }

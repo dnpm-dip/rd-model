@@ -70,12 +70,22 @@ trait Generators
       .map(Clinician(_))
 
 
+  implicit val genOrphanetCoding: Gen[Coding[Orphanet]] =
+    Gen.oneOf(
+      "ORPHA:98907",
+      "ORPHA:98897",
+      "ORPHA:98408",
+      "ORPHA:98375",
+      "ORPHA:984"
+    )
+    .map(Coding[Orphanet](_))
+
   implicit val genDiagnosis: Gen[RDDiagnosis] =
     for {
       id       <- Gen.of[Id[RDDiagnosis]]
       patient  <- Gen.of[Id[Patient]]
       date     <- Gen.const(LocalDate.now).map(Some(_))
-      category <- Gen.of[Coding[RDDiagnosis.Category]]
+      category <- Gen.of[Coding[Orphanet]]
       onsetAge <- Gen.intsBetween(12,42).map(Age(_))
       status   <- Gen.of[Coding[RDDiagnosis.Status.Value]]
     } yield
@@ -85,6 +95,7 @@ trait Generators
         date,
         NonEmptyList.one(category),
         Some(onsetAge),
+        false,
         status
       )
 
@@ -96,21 +107,16 @@ trait Generators
       patient <- Gen.of[Id[Patient]]
       gmId  <- Gen.of[ExternalId[RDCase]]
                  .map(_.copy(system = Some(URI.create("https://www.gestaltmatcher.org/"))))
-                 .map(Some(_))
-      f2gId <- Gen.of[ExternalId[RDCase]]
-                 .map(_.copy(system = Some(URI.create("https://www.face2gene.com/"))))
-                 .map(Some(_))
-      date  <- Gen.const(LocalDate.now).map(Some(_))
+      date  <- Gen.const(LocalDate.now)
       referrer <- Gen.of[Clinician]
       diagnosis <- Gen.of[Id[RDDiagnosis]]
     } yield
       RDCase(
         id,
         Some(extId),
-        gmId,
-        f2gId,
+        Some(gmId),
         Reference(patient,None),
-        date,
+        Some(date),
         referrer,
         Reference(diagnosis,None)
       )
@@ -251,6 +257,7 @@ trait Generators
       pat <- Gen.of[Id[Patient]]
       lab =  Lab("Lab name")
       typ <- Gen.of[Coding[RDNGSReport.Type]]
+      familyControl <- Gen.of[Coding[RDNGSReport.FamilyControlLevel]]
       metaInfo = RDNGSReport.MetaInfo("Seq. Type", "Kit...")
       autoZyg <- Gen.of[Autozygosity]
       variants <- Gen.list(Gen.intsBetween(3,6),Gen.of[Variant])
@@ -261,6 +268,7 @@ trait Generators
         lab,
         Some(LocalDate.now),
         typ,
+        familyControl,
         metaInfo,
         Some(autoZyg),
         Some(variants)

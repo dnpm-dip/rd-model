@@ -41,6 +41,7 @@ final case class RDNGSReport
   performingLab: Lab,
   recordedOn: Option[LocalDate],
   `type`: Coding[RDNGSReport.Type],
+  familyControls: Coding[RDNGSReport.FamilyControlLevel],
   metaInfo: RDNGSReport.MetaInfo,
   autozygosity: Option[Autozygosity],
   variants: Option[List[Variant]]
@@ -77,6 +78,39 @@ object RDNGSReport
     }
 
   }
+
+  sealed trait FamilyControlLevel
+  object FamilyControlLevel
+  {
+
+    implicit val familyControlLevelSystem: Coding.System[FamilyControlLevel] =
+      Coding.System[FamilyControlLevel]("dnpm-dip/rd/ngs-report/family-control-level")
+
+    implicit val familyControlLevelCodeSystem: CodeSystem[FamilyControlLevel] =
+      CodeSystem[FamilyControlLevel](
+        name = "FamilyControlLevel",
+        title = Some("Family Control Level"),
+        version = None,
+        concepts =
+          Seq(
+            "single",
+            "duo",
+            "trio",  
+            ">3"
+          )
+          .map(c => (c,c)): _*
+      )
+
+    object Provider extends SingleCodeSystemProvider[FamilyControlLevel]
+
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
+
+  }
+
 
 
   final case class MetaInfo

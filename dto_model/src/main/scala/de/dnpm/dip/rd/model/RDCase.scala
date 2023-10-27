@@ -32,7 +32,7 @@ final case class RDCase
   id: Id[RDCase],
   externalId: Option[ExternalId[RDCase]],
   gestaltMatcherId: Option[ExternalId[RDCase]], 
-  face2geneId: Option[ExternalId[RDCase]], 
+//  face2geneId: Option[ExternalId[RDCase]], 
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
   referrer: Clinician,

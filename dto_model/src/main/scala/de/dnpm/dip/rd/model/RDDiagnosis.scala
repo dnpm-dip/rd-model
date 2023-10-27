@@ -32,8 +32,9 @@ final case class RDDiagnosis
   id: Id[RDDiagnosis],
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
-  categories: NonEmptyList[Coding[RDDiagnosis.Category]],
+  categories: NonEmptyList[Coding[Orphanet]],
   onsetAge: Option[Age],
+  prenatal: Boolean,
   status: Coding[RDDiagnosis.Status.Value]
 )
 extends Diagnosis
@@ -41,6 +42,7 @@ extends Diagnosis
 object RDDiagnosis
 {
 
+/*  
   sealed trait Category
 
   object Category
@@ -77,7 +79,7 @@ object RDDiagnosis
     }
       
   }
-
+*/
 
   object Status
   extends CodedEnum("dnpm-dip/rd/diagnosis/status")
