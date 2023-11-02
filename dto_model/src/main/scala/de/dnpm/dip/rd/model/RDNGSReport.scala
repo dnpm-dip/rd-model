@@ -18,7 +18,7 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
-  Format
+  OFormat
 }
 
 
@@ -30,7 +30,7 @@ final case class Lab
 
 object Lab
 {
-  implicit val format: Format[Lab] =
+  implicit val format: OFormat[Lab] =
     Json.format[Lab]
 }
 
@@ -119,10 +119,10 @@ object RDNGSReport
     kit: String
   )
 
-  implicit val formatMetaInfo: Format[MetaInfo] =
+  implicit val formatMetaInfo: OFormat[MetaInfo] =
     Json.format[MetaInfo]
 
-  implicit val format: Format[RDNGSReport] =
+  implicit val format: OFormat[RDNGSReport] =
     Json.format[RDNGSReport]
   
 }

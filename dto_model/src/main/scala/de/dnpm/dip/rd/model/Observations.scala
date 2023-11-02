@@ -20,7 +20,8 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
-  Format
+  Format,
+  OFormat
 }
 
 
@@ -35,7 +36,7 @@ extends Observation[Coding[HPO]]
 
 object HPOTerm
 {
-   implicit val format: Format[HPOTerm] =
+   implicit val format: OFormat[HPOTerm] =
     Json.format[HPOTerm]
 }
 
@@ -51,7 +52,7 @@ extends Observation[Float]
 
 object Autozygosity
 {
-   implicit val format: Format[Autozygosity] =
+   implicit val format: OFormat[Autozygosity] =
     Json.format[Autozygosity]
 }
 
@@ -285,7 +286,7 @@ object Variant
   }
 
 
-  implicit val format: Format[Variant] =
+  implicit val format: OFormat[Variant] =
     Json.format[Variant]
   
 } // End object Variant

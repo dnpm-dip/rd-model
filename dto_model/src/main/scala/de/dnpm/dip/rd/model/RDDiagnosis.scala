@@ -22,7 +22,8 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
-  Format
+  Format,
+  OFormat
 }
 
 
@@ -112,6 +113,6 @@ object RDDiagnosis
 
   import de.dnpm.dip.util.json._
 
-  implicit val format: Format[RDDiagnosis] =
+  implicit val format: OFormat[RDDiagnosis] =
     Json.format[RDDiagnosis]
 }

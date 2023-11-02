@@ -8,7 +8,7 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
-  Format
+  OFormat
 }
 
 
@@ -22,6 +22,6 @@ final case class RDTherapy
 object RDTherapy
 {
 
-  implicit val format: Format[RDTherapy] =
+  implicit val format: OFormat[RDTherapy] =
     Json.format[RDTherapy]
 }
