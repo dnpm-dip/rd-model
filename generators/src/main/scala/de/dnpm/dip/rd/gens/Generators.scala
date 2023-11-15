@@ -313,6 +313,7 @@ trait Generators
           Gen.intsBetween(3,5),
           Gen.of[HPOTerm].map(_.copy(patient = patRef))
         )
+        .map(_.distinctBy(_.value.code))
 
       ngsReport <-
         Gen.of[RDNGSReport]
