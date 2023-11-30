@@ -31,8 +31,6 @@ object JsonParser
     raw"(\d{4}-\d{2}-\d{2})".r.unanchored
 
 
-//  private val HpoId = raw"(HP_\d+)".r.unanchored
-
   // Extractor for HPO IDs:
   // In the ontology the node IDs are URL Strings 'http://purl.obolibrary.org/obo/HP_...'
   // so strip redundant URL part and extract only the informative part 'HP_...'
@@ -71,6 +69,9 @@ object JsonParser
               .atTime(LocalTime.MIN)
         }
 
+    val theVersion =
+      Some(version)
+
     // Load only nodes of type "CLASS" for now
     val classes =
       (graph \ "nodes").as[JsArray]
@@ -81,15 +82,30 @@ object JsonParser
             (js \ "lbl").isDefined
         )
 
-    val edges =
+        
+    val (parents,children) =
       (graph \ "edges").as[JsArray]
         .value
         .filter(
           js => (js \ "pred").as[String] == "is_a"  
         )
-
-    val theVersion =
-      Some(version)
+        .foldLeft(
+          Map.empty[Code[HPO],Set[String]] -> Map.empty[Code[HPO],Set[Code[HPO]]]
+        ){
+          case ((parents,children),js) =>
+        
+            val HpoId(child) = (js \ "sub").as[String]
+            val HpoId(parent) = (js \ "obj").as[String]
+        
+           parents.updatedWith(child)(
+             _.map(_ + parent.value)
+              .orElse(Some(Set(parent.value)))
+           ) -> children.updatedWith(parent)(
+             _.map(_ + child)
+              .orElse(Some(Set(child)))
+           ) 
+        
+        }
 
     val concepts =
       classes.map {
@@ -98,16 +114,10 @@ object JsonParser
           val id = (js \ "id").as[String]
 
           val HpoId(code) = id 
-
+          
           val superClasses =
-            edges.collect {
-              case edge if (edge \ "sub").as[String] == id =>
-                val HpoId(c) = (edge \ "obj").as[String]
-                c.value
-            }
-            .toSet
-            .pipe(Option(_))
-            .pipe(_.filter(_.nonEmpty))
+            parents.get(code)
+              .filter(_.nonEmpty)
 
           CodeSystem.Concept[HPO](
             code = code,
@@ -121,15 +131,8 @@ object JsonParser
             // Leave single parent undefined, as a node can have multiple super-classes (accessible via properties)
             parent = None,
             children =
-              Some(
-                edges.collect {
-                  case edge if (edge \ "obj").as[String] == id =>
-                    val HpoId(child) = (edge \ "sub").as[String]
-                    child
-                }
-                .toList
-              )
-              .filter(_.nonEmpty),
+              children.get(code)
+                .filter(_.nonEmpty),                              
           )
       }
       .toSeq

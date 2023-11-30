@@ -7,6 +7,7 @@ import org.scalatest.Inspectors._
 import cats.Id
 import de.dnpm.dip.rd.model.HPO
 import de.dnpm.dip.coding.{
+  Code,
   Coding,
   CodeSystemProvider
 }
@@ -69,6 +70,12 @@ class Tests extends AnyFlatSpec
   it must "pass check that nodes can have mutiple super-classes" in {
 
     atLeast (1, hpo.concepts.map(_.superClasses.size)) must be > 1
+
+  }
+
+  it must "pass check that HPO 'All' has 6 direct sub-classes" in {
+
+    hpo.childrenOf(Code[HPO]("HP:0000001")).size must equal (6)  // Counted manually from HPO
 
   }
 

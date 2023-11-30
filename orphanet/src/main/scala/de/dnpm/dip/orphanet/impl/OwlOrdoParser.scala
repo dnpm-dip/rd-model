@@ -13,7 +13,7 @@ import de.dnpm.dip.coding.{
   CodeSystem
 }
 import de.dnpm.dip.rd.model.Orphanet
-
+import scala.collection.concurrent.TrieMap
 
 
 object OwlOrdoParser
@@ -73,7 +73,11 @@ object OwlOrdoParser
 
     val theVersion =
       Some((owl \ "Ontology" \ "versionInfo").text)
-   
+  
+
+    val subClasses =
+      TrieMap.empty[Code[Orphanet],Set[Code[Orphanet]]]
+
 
     // This parses/extracts only Classes for which
     // the ORPHA-ID in <skos:notation>ORPHA:...</skos:notation> is defined
@@ -82,7 +86,7 @@ object OwlOrdoParser
         .collect {
           case cl if (cl \ "notation") exists (_.text pipe OrphaId.matches) =>
 
-            val code =
+            val orphaCode =
               (cl \ "notation")
                 .map(_.text)
                 .collectFirst {
@@ -106,7 +110,16 @@ object OwlOrdoParser
               Option(
                 (cl \ "subClassOf")
                   .map(sc => (sc \ s"@{$rdf}resource").text)
-                  .collect { case OrphaURL(code) => code }
+                  .collect { 
+                    case OrphaURL(code) =>
+                      // Directly collect the current concept as a sub-class
+                      // of the referenced super-class
+                      subClasses.updateWith(Code[Orphanet](code))(
+                        _.map(_ + orphaCode)
+                         .orElse(Some(Set(orphaCode)))
+                      )
+                      code
+                  }
                   .toSet
               )
               .collect {
@@ -130,7 +143,7 @@ object OwlOrdoParser
             
             
             CodeSystem.Concept[Orphanet](
-              code = code,
+              code = orphaCode,
               display = display,
               version = theVersion,
               properties =
@@ -139,29 +152,24 @@ object OwlOrdoParser
                   icd10Code ++
                   icd11Code ++
                   alternativeTerms,
-              parent = None,
+              parent = None,  // Given the multiple inheritance in ORDO, leave single parent undefined
               children = None // Requires a subsequent iteration below,
                               // once all concepts with their subclasses have been loaded
             )
 
         }
         .pipe(
-          rawConcepts =>
-            rawConcepts.map {
-              concept =>
-                val children =
-                  rawConcepts
-                    .collect {
-                      case c if (c.superClasses contains concept.code) => c.code
-                    }
-                    .toList
-            
-                if (children.nonEmpty)
+          _.map {
+            concept =>
+              subClasses.get(concept.code) match {         
+                case Some(children) if children.nonEmpty =>
                   concept.copy(children = Some(children)) 
-                else
+                case _ =>
                   concept
-            }
-      )
+              }
+          }
+        )
+ 
  
     CodeSystem[Orphanet](
       uri = Coding.System[Orphanet].uri,
