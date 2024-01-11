@@ -93,6 +93,12 @@ object HPOImpl
     ): F[String] =
       versions.map(_.head)
 
+    override def filters(
+      implicit env: Applicative[F] 
+    ): F[List[CodeSystem.Filter[HPO]]] =
+      List.empty.pure
+
+
     override def get(
       version: String
     )(

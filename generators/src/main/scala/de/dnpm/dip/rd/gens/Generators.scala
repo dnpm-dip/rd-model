@@ -13,6 +13,7 @@ import de.dnpm.dip.coding.{
   CodeSystem,
 }
 import de.dnpm.dip.coding.hgnc.HGNC
+import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.{
   Id,
   Age,

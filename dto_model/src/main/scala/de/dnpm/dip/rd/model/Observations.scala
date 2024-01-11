@@ -11,6 +11,7 @@ import de.dnpm.dip.coding.{
   SingleCodeSystemProvider
 }
 import de.dnpm.dip.coding.hgnc.HGNC
+import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.{
   Id,
   ExternalId,
@@ -41,7 +42,6 @@ object HPOTerm
 }
 
 
-
 final case class Autozygosity
 (
   id: Id[Autozygosity],
@@ -54,16 +54,6 @@ object Autozygosity
 {
    implicit val format: OFormat[Autozygosity] =
     Json.format[Autozygosity]
-}
-
-
-
-
-sealed trait HGVS
-object HGVS
-{
-  implicit val hgvsSystem: Coding.System[HGVS] =
-    Coding.System[HGVS]("https://varnomen.hgvs.org")
 }
 
 
