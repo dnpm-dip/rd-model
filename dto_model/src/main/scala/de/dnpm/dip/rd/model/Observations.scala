@@ -276,6 +276,10 @@ object Variant
   }
 
 
+  def display(variant: Variant): String =
+    s"Variant ${variant.gene.display.getOrElse("N/A")} ${variant.proteinChange.map(_.code.value).getOrElse("-")}"
+
+
   implicit val format: OFormat[Variant] =
     Json.format[Variant]
   
