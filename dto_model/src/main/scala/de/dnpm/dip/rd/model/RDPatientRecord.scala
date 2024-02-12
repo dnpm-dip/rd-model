@@ -1,10 +1,15 @@
 package de.dnpm.dip.rd.model
 
 
+
 import cats.data.NonEmptyList
-import de.dnpm.dip.model.Patient
+import de.dnpm.dip.model.{
+  Patient,
+  PatientRecord
+}
 import play.api.libs.json.{
   Json,
+  JsObject,
   OFormat
 }
 
@@ -12,8 +17,9 @@ import play.api.libs.json.{
 final case class RDPatientRecord
 (
   patient: Patient,
+  consent: JsObject,
+  episodes: NonEmptyList[RDCase],
   diagnosis: RDDiagnosis,
-  `case`: RDCase,
   hpoTerms: NonEmptyList[HPOTerm],
   ngsReports: NonEmptyList[RDNGSReport],
   therapy: Option[RDTherapy]

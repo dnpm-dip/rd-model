@@ -4,6 +4,7 @@ package de.dnpm.dip.rd.gens
 import java.net.URI
 import java.time.LocalDate
 import cats.data.NonEmptyList
+import play.api.libs.json.JsObject
 import de.ekut.tbi.generators.{
   Gen,
 }
@@ -17,10 +18,13 @@ import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.{
   Id,
   Age,
+  Episode,
   ExternalId,
   Reference,
   Gender,
-  Patient
+  Patient,
+  Period,
+  TTAN
 }
 import de.dnpm.dip.rd.model._
 
@@ -101,13 +105,44 @@ trait Generators
       )
 
 
+  def genCase(
+    patient: Patient,
+    diagnoses: List[RDDiagnosis]
+  ): Gen[RDCase] =
+    for {
+      id    <- Gen.of[Id[RDCase]]
+      ttan  <- Gen.of[Id[TTAN]]
+      extId <- Gen.of[ExternalId[RDCase]]
+//      gmId  <- Gen.of[ExternalId[RDCase]]
+//                 .map(_.copy(system = Some(Coding.System[GestaltMatcher].uri)))
+      gmId  <- Gen.uuidStrings
+                  .map(ExternalId[RDCase,GestaltMatcher](_))
+      date  <- Gen.const(LocalDate.now)
+      period = Period(date)
+      referrer <- Gen.of[Clinician]
+    } yield
+      RDCase(
+        id,
+        Some(extId),
+        ttan,
+        Some(gmId),
+        Reference(patient),
+        Coding(Episode.Status.Unknown),
+        Some(date),
+        period,
+        diagnoses.map(Reference(_)),
+        referrer
+      )
+
+/*
   implicit val genCase: Gen[RDCase] =
     for {
       id    <- Gen.of[Id[RDCase]]
       extId <- Gen.of[ExternalId[RDCase]]
       patient <- Gen.of[Id[Patient]]
       gmId  <- Gen.of[ExternalId[RDCase]]
-                 .map(_.copy(system = Some(URI.create("https://www.gestaltmatcher.org/"))))
+                 .map(_.copy(system = Some(Coding.System[GestaltMatcher].uri))))
+//                 .map(_.copy(system = Some(URI.create("https://www.gestaltmatcher.org/"))))
       date  <- Gen.const(LocalDate.now)
       referrer <- Gen.of[Clinician]
       diagnosis <- Gen.of[Id[RDDiagnosis]]
@@ -121,7 +156,7 @@ trait Generators
         referrer,
         Reference(diagnosis,None)
       )
-
+*/
 
   implicit val genHpoCoding: Gen[Coding[HPO]] =
     Gen.oneOf(
@@ -301,13 +336,7 @@ trait Generators
           .map(_.copy(patient = patRef))
 
       cse <-
-        Gen.of[RDCase]
-          .map(
-            _.copy(
-              patient = patRef,
-              reason = Reference(diag)
-            )
-          ) 
+        genCase(patient,List(diag))
 
       hpoTerms <-
         Gen.list(
@@ -334,8 +363,9 @@ trait Generators
     } yield
       RDPatientRecord(
         patient,
+        JsObject.empty,
+        NonEmptyList.one(cse),
         diag,
-        cse,
         NonEmptyList.fromListUnsafe(hpoTerms),
         NonEmptyList.one(ngsReport),
         Some(therapy)
