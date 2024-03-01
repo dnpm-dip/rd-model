@@ -24,7 +24,7 @@ import de.dnpm.dip.model.{
   Gender,
   Patient,
   Period,
-  TTAN
+  TransferTAN
 }
 import de.dnpm.dip.rd.model._
 
@@ -38,14 +38,30 @@ trait Generators
       .map(Id(_))
 
 
-  implicit def genExternalId[T]: Gen[ExternalId[T]] =
+  implicit def genExtId[T]: Gen[ExternalId[T]] =
     Gen.uuidStrings
       .map(ExternalId(_,None))
+
+
+  def genExternalId[T,S: Coding.System]: Gen[ExternalId[T]] =
+    Gen.uuidStrings
+       .map(ExternalId[T,S](_))
+
+  implicit def genReference[T]: Gen[Reference[T]] =
+    Gen.uuidStrings
+      .map(Reference.id(_))
 
 
   implicit def genCodingfromCodeSystem[S: Coding.System: CodeSystem]: Gen[Coding[S]] =
     Gen.oneOf(CodeSystem[S].concepts)
       .map(Coding.fromConcept(_))
+
+
+  implicit val genPubMedId: Gen[ExternalId[Publication]] =
+    Gen.ints
+      .map(_.toString)
+      .map(ExternalId[Publication,PubMed](_))
+
 
 
   implicit val genPatient: Gen[Patient] =
@@ -68,11 +84,6 @@ trait Generators
         None,
         None
       )
-
-
-  implicit val genClinician: Gen[Clinician] =
-    Gen.const("Dr. House")
-      .map(Clinician(_))
 
 
   implicit val genOrphanetCoding: Gen[Coding[Orphanet]] =
@@ -111,52 +122,18 @@ trait Generators
   ): Gen[RDCase] =
     for {
       id    <- Gen.of[Id[RDCase]]
-      ttan  <- Gen.of[Id[TTAN]]
+      ttan  <- Gen.of[Id[TransferTAN]]
       extId <- Gen.of[ExternalId[RDCase]]
-//      gmId  <- Gen.of[ExternalId[RDCase]]
-//                 .map(_.copy(system = Some(Coding.System[GestaltMatcher].uri)))
-      gmId  <- Gen.uuidStrings
-                  .map(ExternalId[RDCase,GestaltMatcher](_))
-      date  <- Gen.const(LocalDate.now)
-      period = Period(date)
-      referrer <- Gen.of[Clinician]
+      gmId <- genExternalId[RDCase,GestaltMatcher]
     } yield
       RDCase(
         id,
         Some(extId),
-        ttan,
-        Some(gmId),
         Reference(patient),
-        Coding(Episode.Status.Unknown),
-        Some(date),
-        period,
-        diagnoses.map(Reference(_)),
-        referrer
-      )
-
-/*
-  implicit val genCase: Gen[RDCase] =
-    for {
-      id    <- Gen.of[Id[RDCase]]
-      extId <- Gen.of[ExternalId[RDCase]]
-      patient <- Gen.of[Id[Patient]]
-      gmId  <- Gen.of[ExternalId[RDCase]]
-                 .map(_.copy(system = Some(Coding.System[GestaltMatcher].uri))))
-//                 .map(_.copy(system = Some(URI.create("https://www.gestaltmatcher.org/"))))
-      date  <- Gen.const(LocalDate.now)
-      referrer <- Gen.of[Clinician]
-      diagnosis <- Gen.of[Id[RDDiagnosis]]
-    } yield
-      RDCase(
-        id,
-        Some(extId),
+        Some(ttan),
         Some(gmId),
-        Reference(patient,None),
-        Some(date),
-        referrer,
-        Reference(diagnosis,None)
+        diagnoses.map(Reference(_)),
       )
-*/
 
   implicit val genHpoCoding: Gen[Coding[HPO]] =
     Gen.oneOf(
@@ -244,38 +221,53 @@ trait Generators
     .map(Coding[HGVS](_))
 
 
-  implicit val genVariant: Gen[Variant] =
+  implicit val genAcmgCriterion: Gen[ACMG.Criterion] =
+    for { 
+      value    <- Gen.of[Coding[ACMG.Criterion.Type.Value]]
+      modifier <- Gen.of[Coding[ACMG.Criterion.Modifier.Value]]
+    } yield ACMG.Criterion(
+      value,
+      Some(modifier)
+    )
+
+  private val bases =
+    Seq("A","C","G","T")
+
+
+  implicit val genSmallVariant: Gen[SmallVariant] =
     for {
-      id  <- Gen.of[Id[Variant]]
-      pat <- Gen.of[Id[Patient]]
-      gene <- Gen.of[Coding[HGNC]]
-      loe <- Gen.const("Level of evidence")
-      iscn <- Gen.const("Some ISCN description")
-      pmid <- Gen.ints.map(_.abs.toString)
-      cDNAChg <- Gen.oneOf(cDNAChanges)
-      gDNAChg <- Gen.oneOf(gDNAChanges)
+      id    <- Gen.of[Id[SmallVariant]]
+      pat   <- Gen.of[Id[Patient]]
+      chr   <- Gen.of[Coding[Chromosome.Value]]
+      gene  <- Gen.of[Coding[HGNC]]
+      pos   <- Gen.ints
+      ref   <- Gen.oneOf(bases)
+      alt   <- Gen.oneOf((bases.toSet - ref).toSeq)
+      dnaChg <- Gen.oneOf(gDNAChanges)
       proteinChg <- Gen.oneOf(proteinChanges)
-      acmgClass <- Gen.of[Coding[Variant.ACMGClass]]
+      acmgClass <- Gen.of[Coding[ACMG.Class.Value]]
       acmgCriteria <-
         Gen.list(
-          Gen.intsBetween(1,4),
-          Gen.of[Coding[Variant.ACMGCriteria]]
+          Gen.intsBetween(1,3),
+          Gen.of[ACMG.Criterion]
         )
-      zygosity <- Gen.of[Coding[Variant.Zygosity]]
-      segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis]]
-      inh <- Gen.of[Coding[Variant.InheritanceMode]]
-      signif <- Gen.of[Coding[Variant.Significance]]
-      clinVar <- Gen.uuidStrings.map(Set(_))
+      zygosity <- Gen.of[Coding[Variant.Zygosity.Value]]
+      segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis.Value]]
+      inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
+      signif <- Gen.of[Coding[Variant.Significance.Value]]
+      clinVarId <- genExternalId[SmallVariant,ClinVar]
+      pmid <- Gen.of[ExternalId[Publication]]
     } yield 
-      Variant(
+      SmallVariant(
         id,
         Reference(pat,None),
-        gene,
-        Some(loe),
-        Some(iscn),
-        Some(ExternalId(pmid,"https://pubmed.ncbi.nlm.nih.gov/")),
-        Some(cDNAChg),
-        Some(gDNAChg),
+        chr,
+        Some(Set(gene)),
+        pos,
+        ref,
+        alt,
+        Some(dnaChg),
+        Some(dnaChg),
         Some(proteinChg),
         acmgClass,
         Some(acmgCriteria.toSet),
@@ -283,20 +275,116 @@ trait Generators
         Some(segAnalysis),
         Some(inh),
         Some(signif),
-        Some(clinVar)
+        Some(clinVarId),
+        Some(Set(pmid))
       )
+
+  implicit val genStructuralVariant: Gen[StructuralVariant] =
+    for {
+      id    <- Gen.of[Id[SmallVariant]]
+      pat   <- Gen.of[Id[Patient]]
+      gene  <- Gen.of[Coding[HGNC]]
+      iscn  <- Gen.const(Coding[ISCN]("Some ISCN description"))
+      dnaChg <- Gen.oneOf(gDNAChanges)
+      proteinChg <- Gen.oneOf(proteinChanges)
+      acmgClass <- Gen.of[Coding[ACMG.Class.Value]]
+      acmgCriteria <-
+        Gen.list(
+          Gen.intsBetween(1,3),
+          Gen.of[ACMG.Criterion]
+        )
+      zygosity <- Gen.of[Coding[Variant.Zygosity.Value]]
+      segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis.Value]]
+      inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
+      signif <- Gen.of[Coding[Variant.Significance.Value]]
+      clinVarId <- genExternalId[SmallVariant,ClinVar]
+      pmid <- Gen.of[ExternalId[Publication]]
+    } yield 
+      StructuralVariant(
+        id,
+        Reference(pat,None),
+        Some(Set(gene)),
+        Some(iscn),
+        Some(dnaChg),
+        Some(dnaChg),
+        Some(proteinChg),
+        acmgClass,
+        Some(acmgCriteria.toSet),
+        zygosity,
+        Some(segAnalysis),
+        Some(inh),
+        Some(signif),
+        Some(clinVarId),
+        Some(Set(pmid))
+      )
+
+  implicit val genCopyNumberVariant: Gen[CopyNumberVariant] =
+    for {
+      id    <- Gen.of[Id[SmallVariant]]
+      pat   <- Gen.of[Id[Patient]]
+      chr   <- Gen.of[Coding[Chromosome.Value]]
+      gene  <- Gen.of[Coding[HGNC]]
+      start <- Gen.ints
+      end   <- Gen.ints
+      typ   <- Gen.of[Coding[CopyNumberVariant.Type.Value]]
+      dnaChg <- Gen.oneOf(gDNAChanges)
+      proteinChg <- Gen.oneOf(proteinChanges)
+      acmgClass <- Gen.of[Coding[ACMG.Class.Value]]
+      acmgCriteria <-
+        Gen.list(
+          Gen.intsBetween(1,3),
+          Gen.of[ACMG.Criterion]
+        )
+      zygosity <- Gen.of[Coding[Variant.Zygosity.Value]]
+      segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis.Value]]
+      inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
+      signif <- Gen.of[Coding[Variant.Significance.Value]]
+      clinVarId <- genExternalId[SmallVariant,ClinVar]
+      pmid <- Gen.of[ExternalId[Publication]]
+    } yield 
+      CopyNumberVariant(
+        id,
+        Reference(pat,None),
+        chr,
+        Some(Set(gene)),
+        start,
+        end,
+        typ,
+        Some(dnaChg),
+        Some(dnaChg),
+        Some(proteinChg),
+        acmgClass,
+        Some(acmgCriteria.toSet),
+        zygosity,
+        Some(segAnalysis),
+        Some(inh),
+        Some(signif),
+        Some(clinVarId),
+        Some(Set(pmid))
+      )
+
 
 
   implicit val genNGSReport: Gen[RDNGSReport] =
     for {
       id  <- Gen.of[Id[RDNGSReport]]
       pat <- Gen.of[Id[Patient]]
-      lab =  Lab("Lab name")
-      typ <- Gen.of[Coding[RDNGSReport.Type]]
-      familyControl <- Gen.of[Coding[RDNGSReport.FamilyControlLevel]]
-      metaInfo = RDNGSReport.MetaInfo("Seq. Type", "Kit...")
+      lab <- Gen.uuidStrings
+               .map(Reference.id[Lab](_,Some("Lab name")))
+      typ <- Gen.of[Coding[RDNGSReport.Type.Value]]
+      familyControl <- Gen.of[Coding[RDNGSReport.FamilyControlLevel.Value]]
+
+      metaInfo <-
+        for {
+          platform <- Gen.of[Coding[RDNGSReport.Platform]]
+        } yield RDNGSReport.SequencingInfo(
+          platform,
+          "Kit..."
+        )
       autoZyg <- Gen.of[Autozygosity]
-      variants <- Gen.list(Gen.intsBetween(3,6),Gen.of[Variant])
+      smallVariants <- Gen.list(Gen.intsBetween(3,5),Gen.of[SmallVariant])
+      cnvs <- Gen.list(Gen.intsBetween(3,5),Gen.of[CopyNumberVariant])
+      svs <- Gen.list(Gen.intsBetween(3,5),Gen.of[StructuralVariant])
     } yield
       RDNGSReport(
         id,
@@ -307,7 +395,9 @@ trait Generators
         familyControl,
         metaInfo,
         Some(autoZyg),
-        Some(variants)
+        Some(smallVariants),
+        Some(cnvs),
+        Some(svs),
       )
 
 
@@ -352,7 +442,9 @@ trait Generators
               ngs.copy(
                 patient = patRef,
                 autozygosity = ngs.autozygosity.map(_.copy(patient = patRef)),
-                variants = ngs.variants.map(_.map(_.copy(patient = patRef)))
+                smallVariants = ngs.smallVariants.map(_.map(_.copy(patient = patRef))),
+                copyNumberVariants = ngs.copyNumberVariants.map(_.map(_.copy(patient = patRef))),
+                structuralVariants = ngs.structuralVariants.map(_.map(_.copy(patient = patRef)))
               )
           )
 

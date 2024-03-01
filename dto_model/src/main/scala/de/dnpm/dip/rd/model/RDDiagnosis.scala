@@ -33,7 +33,7 @@ final case class RDDiagnosis
   id: Id[RDDiagnosis],
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
-  categories: NonEmptyList[Coding[Orphanet]],
+  categories: NonEmptyList[Coding[Any]],
   onsetAge: Option[Age],
   prenatal: Boolean,
   status: Coding[RDDiagnosis.Status.Value]

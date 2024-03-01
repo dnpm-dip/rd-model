@@ -11,24 +11,11 @@ import de.dnpm.dip.model.{
   Patient,
   Period,
   Reference,
-  TTAN
+  TransferTAN
 }
 import play.api.libs.json.{
   Json,
   OFormat
-}
-
-
-final case class Clinician
-(
-  name: String
-)
-
-object Clinician
-{
-
-  implicit val format: OFormat[Clinician] =
-    Json.format[Clinician]
 }
 
 
@@ -44,21 +31,19 @@ final case class RDCase
 (
   id: Id[RDCase],
   externalId: Option[ExternalId[RDCase]],
-  ttan: Id[TTAN],
-  gestaltMatcherId: Option[ExternalId[RDCase]], 
   patient: Reference[Patient],
-  status: Coding[Episode.Status.Value],
-  recordedOn: Option[LocalDate],
-  period: Period[LocalDate],
-  diagnoses: List[Reference[RDDiagnosis]],
-  referrer: Clinician,
+  transferTan: Option[Id[TransferTAN]],
+  gestaltMatcherId: Option[ExternalId[RDCase]], 
+//  status: Coding[Episode.Status.Value],
+//  recordedOn: Option[LocalDate],
+//  period: Period[LocalDate],
+  diagnoses: List[Reference[RDDiagnosis]]
 )
 extends Episode
 
 
 object RDCase
 {
-
   implicit val format: OFormat[RDCase] =
     Json.format[RDCase]
 }

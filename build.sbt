@@ -22,6 +22,7 @@ lazy val global = project
   )
   .aggregate(
      dto_model,
+     json_schema,
      hpo,
      orphanet,
      generators
@@ -38,6 +39,20 @@ lazy val dto_model = project
     )
   )
 
+lazy val json_schema = project
+  .settings(
+    name := "rd-json-schema",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scalatest,
+      dependencies.scala_jsonschema,
+      dependencies.scala_jsonschema_cats,
+      dependencies.scala_jsonschema_play,
+
+    )
+  )
+  .dependsOn(dto_model)
+
 lazy val hpo = project
   .settings(
     name := "hp-ontology",
@@ -46,9 +61,7 @@ lazy val hpo = project
       dependencies.scalatest
     )
   )
-  .dependsOn(
-    dto_model
-  )
+  .dependsOn(dto_model)
 
 lazy val orphanet = project
   .settings(
@@ -59,9 +72,7 @@ lazy val orphanet = project
       dependencies.scalatest
     )
   )
-  .dependsOn(
-    dto_model
-  )
+  .dependsOn(dto_model)
 
 
 lazy val generators = project
@@ -85,10 +96,14 @@ lazy val generators = project
 
 lazy val dependencies =
   new {
-    val scalatest   = "org.scalatest"           %% "scalatest"   % "3.2.17" % Test
-    val scala_xml   = "org.scala-lang.modules"  %% "scala-xml"   % "2.0.1"
-    val core        = "de.dnpm.dip"             %% "core"        % "1.0-SNAPSHOT"
-    val generators  = "de.ekut.tbi"             %% "generators"  % "1.0-SNAPSHOT"
+    val scalatest             = "org.scalatest"          %% "scalatest"                  % "3.2.17" % Test
+    val scala_xml             = "org.scala-lang.modules" %% "scala-xml"                  % "2.0.1"
+    val core                  = "de.dnpm.dip"            %% "core"                       % "1.0-SNAPSHOT"
+    val generators            = "de.ekut.tbi"            %% "generators"                 % "1.0-SNAPSHOT"
+    val scala_jsonschema      = "com.github.andyglow"    %% "scala-jsonschema"           % "0.7.11"
+    val scala_jsonschema_cats = "com.github.andyglow"    %% "scala-jsonschema-cats"      % "0.7.11"
+    val scala_jsonschema_play = "com.github.andyglow"    %% "scala-jsonschema-play-json" % "0.7.11"
+
   }
 
 
