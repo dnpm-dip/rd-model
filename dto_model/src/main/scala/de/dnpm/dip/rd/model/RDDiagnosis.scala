@@ -13,6 +13,7 @@ import de.dnpm.dip.coding.{
   CodeSystemProviderSPI,
   SingleCodeSystemProvider
 }
+import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.model.{
   Id,
   Reference,
@@ -25,7 +26,10 @@ import play.api.libs.json.{
   Format,
   OFormat
 }
-
+import shapeless.{
+  :+:,
+  CNil
+}
 
 
 final case class RDDiagnosis
@@ -33,7 +37,8 @@ final case class RDDiagnosis
   id: Id[RDDiagnosis],
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
-  categories: NonEmptyList[Coding[Any]],
+  categories: NonEmptyList[Coding[RDDiagnosis.Category]],
+//  categories: NonEmptyList[Coding[Any]],
   onsetAge: Option[Age],
   prenatal: Boolean,
   status: Coding[RDDiagnosis.Status.Value]
@@ -42,6 +47,9 @@ extends Diagnosis
 
 object RDDiagnosis
 {
+
+  type Category = Orphanet :+: ICD10GM :+: CNil
+
 
   object Status
   extends CodedEnum("dnpm-dip/rd/diagnosis/status")

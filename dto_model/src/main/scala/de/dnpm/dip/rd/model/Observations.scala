@@ -20,6 +20,7 @@ import de.dnpm.dip.model.{
   ExternalId,
   Reference,
   Patient,
+  Publication,
   Observation
 }
 import play.api.libs.json.{
@@ -273,15 +274,6 @@ object ISCN
     Coding.System[ISCN]("https://iscn.karger.com/")
 }
 
-sealed trait PubMed
-object PubMed
-{
-  implicit val system: Coding.System[PubMed] =
-    Coding.System[PubMed]("https://pubmed.ncbi.nlm.nih.gov/")
-}
-
-
-sealed trait Publication
 
 sealed abstract class Variant
 {
@@ -298,7 +290,7 @@ sealed abstract class Variant
   val modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]]
   val significance: Option[Coding[Variant.Significance.Value]]
   val clinVarID: Option[ExternalId[Variant]]
-  val pubMedIDs: Option[Set[ExternalId[Publication]]]
+  val publications: Option[Set[Reference[Publication]]]
 }
 
 object Variant
@@ -442,7 +434,7 @@ final case class SmallVariant
   modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
   clinVarID: Option[ExternalId[Variant]],
-  pubMedIDs: Option[Set[ExternalId[Publication]]]
+  publications: Option[Set[Reference[Publication]]]
 )
 extends Variant
 
@@ -469,7 +461,7 @@ final case class StructuralVariant
   modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
   clinVarID: Option[ExternalId[Variant]],
-  pubMedIDs: Option[Set[ExternalId[Publication]]]
+  publications: Option[Set[Reference[Publication]]]
 )
 extends Variant
 
@@ -499,7 +491,7 @@ final case class CopyNumberVariant
   modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
   clinVarID: Option[ExternalId[Variant]],
-  pubMedIDs: Option[Set[ExternalId[Publication]]]
+  publications: Option[Set[Reference[Publication]]]
 )
 extends Variant
 

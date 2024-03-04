@@ -13,6 +13,7 @@ import json.{
 import com.github.andyglow.json.Value
 import com.github.andyglow.jsonschema.AsPlay._
 import com.github.andyglow.jsonschema.CatsSupport._
+import Schema.`object`.Field
 import json.schema.Version._
 import de.dnpm.dip.coding.{
   Code,
@@ -27,7 +28,6 @@ import de.dnpm.dip.model.{
   Period,
   OpenEndPeriod,
   Reference,
-  IdReference,
 }
 import de.dnpm.dip.rd.model._
 import shapeless.{
@@ -39,7 +39,6 @@ import shapeless.{
 trait BaseJsonSchemas
 {
 
-  import Schema.`object`.Field
 
 
   implicit def idSchema[T]: Schema[Id[T]] =
@@ -60,30 +59,9 @@ trait BaseJsonSchemas
       Field("id",Schema.`string`),
     )
     .toDefinition("Reference")
+//    Json.schema[Reference[T]]
 
-
-  def enumCodeSchema[E <: Enumeration](
-    implicit w: Witness.Aux[E]
-  ): Schema[Code[E#Value]] =
-    Schema.`enum`[Code[E#Value]](
-      Schema.`string`,
-      w.value.values.map(_.toString).toSet.map(Value.str)
-    )
-
-
-  def codeSchema[T](cs: CodeSystem[T]): Schema[Code[T]] =
-    Schema.`enum`[Code[T]](
-      Schema.`string`,
-      cs.concepts.map(_.code.value).toSet.map(Value.str)
-    )
-
-
-  implicit def codeSchema[T]: Schema[Code[T]] =
-    Schema.`string`.asInstanceOf[Schema[Code[T]]]
-      .toDefinition("Code")
-
-
-  def enumCodingSchema[E <: Enumeration](
+  implicit def enumCodingSchema[E <: Enumeration](
     implicit w: Witness.Aux[E]
   ): Schema[Coding[E#Value]] = {
     val name =
@@ -102,14 +80,26 @@ trait BaseJsonSchemas
       .pipe(_.replace("$","."))
 
     Schema.`object`[Coding[E#Value]](
-      Field("code",enumCodeSchema[E]),
+      Field(
+        "code",
+        Schema.`enum`[Code[E#Value]](
+          Schema.`string`,
+          w.value.values.map(_.toString).toSet.map(Value.str)
+        )
+      ),
       Field("display",Schema.`string`,false),
       Field("system",Schema.`string`(Schema.`string`.Format.`uri`),false),
       Field("version",Schema.`string`,false)
     )
     .toDefinition(s"Coding[$name]")
   }
- 
+
+
+
+  protected def codeSchema[T]: Schema[Code[T]] =
+    Schema.`string`.asInstanceOf[Schema[Code[T]]]
+      .toDefinition("Code")
+
 
   implicit def codingSchema[T](
     implicit notAny: T =:!= Any
@@ -122,7 +112,7 @@ trait BaseJsonSchemas
     )
     .toDefinition("Coding")
 
-
+/*
   implicit val anyCodingSchema: Schema[Coding[Any]] =
     Schema.`object`[Coding[Any]](
       Field("code",codeSchema[Any]),
@@ -131,7 +121,7 @@ trait BaseJsonSchemas
       Field("version",Schema.`string`,false)
     )
     .toDefinition("Coding[Any]")
-
+*/
 
   implicit val datePeriodSchema: Schema[Period[LocalDate]] =
     Json.schema[OpenEndPeriod[LocalDate]]
@@ -162,42 +152,62 @@ trait Schemas extends BaseJsonSchemas
 
   implicit val patientSchema: Schema[Patient] =
     Json.schema[Patient]
+      .toDefinition("Patient")
 
 
   implicit val consentSchema: Schema[JsObject] = 
     Schema.`object`.Free[JsObject]()
+      .toDefinition("Consent")
+
+
+  implicit val diagCategoryCoding: Schema[Coding[RDDiagnosis.Category]] =
+    Schema.`object`[Coding[RDDiagnosis.Category]](
+      Field("code",codeSchema[Any]),
+      Field("display",Schema.`string`,false),
+      Field("system",Schema.`string`(Schema.`string`.Format.`uri`),true),
+      Field("version",Schema.`string`,true)
+    )
+    .toDefinition("Coding[Orphanet|ICD-10-GM|OMIM]")
 
 
   implicit val diagnosisSchema: Schema[RDDiagnosis] =
     Json.schema[RDDiagnosis]
+      .toDefinition("Diagnosis")
 
 
   implicit val caseSchema: Schema[RDCase] =
     Json.schema[RDCase]
+      .toDefinition("Case")
 
 
   implicit val hpoTermSchema: Schema[HPOTerm] =
     Json.schema[HPOTerm]
+      .toDefinition("HPOTerm")
 
  
   implicit val SmallVariantSchema: Schema[SmallVariant] =
     Json.schema[SmallVariant]
+      .toDefinition("SmallVariant")
 
 
   implicit val StructuralVariantSchema: Schema[StructuralVariant] =
     Json.schema[StructuralVariant]
+      .toDefinition("StructuralVariant")
 
 
   implicit val CopyNumberVariantSchema: Schema[CopyNumberVariant] =
     Json.schema[CopyNumberVariant]
+      .toDefinition("CopyNumberVariant")
 
 
   implicit val ngsReportSchema: Schema[RDNGSReport] =
     Json.schema[RDNGSReport]
+      .toDefinition("NGSReport")
 
 
   implicit val patientRecordSchema: Schema[RDPatientRecord] =
     Json.schema[RDPatientRecord]
+      .toDefinition("PatientRecord")
 
 }
 

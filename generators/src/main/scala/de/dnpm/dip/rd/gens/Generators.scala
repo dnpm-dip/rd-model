@@ -24,10 +24,11 @@ import de.dnpm.dip.model.{
   Gender,
   Patient,
   Period,
+  Publication,
+  PubMed,
   TransferTAN
 }
 import de.dnpm.dip.rd.model._
-
 
 
 trait Generators
@@ -48,8 +49,8 @@ trait Generators
        .map(ExternalId[T,S](_))
 
   implicit def genReference[T]: Gen[Reference[T]] =
-    Gen.uuidStrings
-      .map(Reference.id(_))
+    Gen.of[Id[T]]
+      .map(Reference.from(_))
 
 
   implicit def genCodingfromCodeSystem[S: Coding.System: CodeSystem]: Gen[Coding[S]] =
@@ -57,11 +58,42 @@ trait Generators
       .map(Coding.fromConcept(_))
 
 
-  implicit val genPubMedId: Gen[ExternalId[Publication]] =
+  import shapeless.{Coproduct, :+:, CNil, Inl, Inr, Nat}
+  import shapeless.ops.coproduct
+  import shapeless.ops.nat.ToInt
+
+  implicit def genCoproductCoding[H: Coding.System, T <: Coproduct, L <: Nat](
+    implicit
+    genH: Gen[Coding[H]],
+//    genT: Gen[Coding[T]],
+    len: coproduct.Length.Aux[T, L],
+    lenAsInt: ToInt[L]
+  ): Gen[Coding[H :+: T]] =
+    for {
+      p <- Gen.doubles
+/*
+      coding <-
+        if (p < 1.0/(1 + lenAsInt())) genH
+        else genT
+*/
+      coding <- genH  
+    } yield coding.asInstanceOf[Coding[H :+: T]]
+
+
+  implicit def genCoproductTermination[H: Coding.System](
+    implicit genH: Gen[Coding[H]]
+  ): Gen[Coding[H :+: CNil]] =
+    genH.map(_.asInstanceOf[Coding[H :+: CNil]])
+
+
+
+
+//  implicit val genPubMedId: Gen[ExternalId[Publication]] =
+  implicit val genPubMedId: Gen[Reference[Publication]] =
     Gen.ints
       .map(_.toString)
       .map(ExternalId[Publication,PubMed](_))
-
+      .map(Reference.from(_))
 
 
   implicit val genPatient: Gen[Patient] =
@@ -101,13 +133,14 @@ trait Generators
       id       <- Gen.of[Id[RDDiagnosis]]
       patient  <- Gen.of[Id[Patient]]
       date     <- Gen.const(LocalDate.now).map(Some(_))
-      category <- Gen.of[Coding[Orphanet]]
+      category <- Gen.of[Coding[RDDiagnosis.Category]]
+//      category <- Gen.of[Coding[Orphanet]]
       onsetAge <- Gen.intsBetween(12,42).map(Age(_))
       status   <- Gen.of[Coding[RDDiagnosis.Status.Value]]
     } yield
       RDDiagnosis(
         id,
-        Reference(patient,None),
+        Reference.from(patient),
         date,
         NonEmptyList.one(category),
         Some(onsetAge),
@@ -129,10 +162,10 @@ trait Generators
       RDCase(
         id,
         Some(extId),
-        Reference(patient),
+        Reference.to(patient),
         Some(ttan),
         Some(gmId),
-        diagnoses.map(Reference(_)),
+        diagnoses.map(Reference.to),
       )
 
   implicit val genHpoCoding: Gen[Coding[HPO]] =
@@ -154,7 +187,7 @@ trait Generators
     } yield
       HPOTerm(
         id,
-        Reference(pat,None),
+        Reference.from(pat),
         value
       )
 
@@ -167,7 +200,7 @@ trait Generators
     } yield
       Autozygosity(
         id,
-        Reference(pat,None),
+        Reference.from(pat),
         value
       )
 
@@ -256,11 +289,11 @@ trait Generators
       inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
       signif <- Gen.of[Coding[Variant.Significance.Value]]
       clinVarId <- genExternalId[SmallVariant,ClinVar]
-      pmid <- Gen.of[ExternalId[Publication]]
+      pmid <- Gen.of[Reference[Publication]]
     } yield 
       SmallVariant(
         id,
-        Reference(pat,None),
+        Reference.from(pat),
         chr,
         Some(Set(gene)),
         pos,
@@ -298,11 +331,11 @@ trait Generators
       inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
       signif <- Gen.of[Coding[Variant.Significance.Value]]
       clinVarId <- genExternalId[SmallVariant,ClinVar]
-      pmid <- Gen.of[ExternalId[Publication]]
+      pmid <- Gen.of[Reference[Publication]]
     } yield 
       StructuralVariant(
         id,
-        Reference(pat,None),
+        Reference.from(pat),
         Some(Set(gene)),
         Some(iscn),
         Some(dnaChg),
@@ -340,11 +373,11 @@ trait Generators
       inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
       signif <- Gen.of[Coding[Variant.Significance.Value]]
       clinVarId <- genExternalId[SmallVariant,ClinVar]
-      pmid <- Gen.of[ExternalId[Publication]]
+      pmid <- Gen.of[Reference[Publication]]
     } yield 
       CopyNumberVariant(
         id,
-        Reference(pat,None),
+        Reference.from(pat),
         chr,
         Some(Set(gene)),
         start,
@@ -369,8 +402,7 @@ trait Generators
     for {
       id  <- Gen.of[Id[RDNGSReport]]
       pat <- Gen.of[Id[Patient]]
-      lab <- Gen.uuidStrings
-               .map(Reference.id[Lab](_,Some("Lab name")))
+      lab <- Gen.of[Id[Lab]].map(Reference.from(_).copy(display = Some("Lab name")))
       typ <- Gen.of[Coding[RDNGSReport.Type.Value]]
       familyControl <- Gen.of[Coding[RDNGSReport.FamilyControlLevel.Value]]
 
@@ -388,7 +420,7 @@ trait Generators
     } yield
       RDNGSReport(
         id,
-        Reference(pat,None),
+        Reference.from(pat),
         lab,
         Some(LocalDate.now),
         typ,
@@ -409,7 +441,7 @@ trait Generators
     } yield
       RDTherapy(
         id,
-        Reference(pat,None),
+        Reference.from(pat),
         notes
       )
 
@@ -419,7 +451,7 @@ trait Generators
       patient <-
         Gen.of[Patient]
 
-      patRef = Reference(patient)
+      patRef = Reference.to(patient)
 
       diag <-
         Gen.of[RDDiagnosis]
