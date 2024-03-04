@@ -48,7 +48,8 @@ extends Diagnosis
 object RDDiagnosis
 {
 
-  type Category = Orphanet :+: ICD10GM :+: CNil
+  type Category =
+    Orphanet :+: ICD10GM :+: CNil
 
 
   object Status

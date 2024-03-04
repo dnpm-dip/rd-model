@@ -20,12 +20,15 @@ import de.dnpm.dip.coding.{
   Coding,
   CodeSystem
 }
+import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.model.{
   Age,
   ExternalId,
   Id,
   Patient,
   Period,
+  Publication,
+  PubMed,
   OpenEndPeriod,
   Reference,
 }
@@ -38,7 +41,6 @@ import shapeless.{
 
 trait BaseJsonSchemas
 {
-
 
 
   implicit def idSchema[T]: Schema[Id[T]] =
@@ -54,12 +56,28 @@ trait BaseJsonSchemas
     .toDefinition("ExternalId")
 
 
-  implicit def referenceSchema[T]: Schema[Reference[T]] =
+  implicit def defaultReferenceSchema[T]: Schema[Reference[T]] =
     Schema.`object`[Reference[T]](
       Field("id",Schema.`string`),
     )
     .toDefinition("Reference")
 //    Json.schema[Reference[T]]
+
+
+  implicit val publicationReferenceSchema: Schema[Reference[Publication]] =
+    Schema.`object`[Reference[Publication]](
+      Field(
+        "extId",
+        Schema.`object`[ExternalId[Publication]](
+          Field("value",Schema.`string`),
+          Field("system",Schema.`string`(Schema.`string`.Format.`uri`),true,Coding.System[PubMed].uri.toString),
+        ),
+        false
+      ),
+      Field("uri",Schema.`string`(Schema.`string`.Format.`uri`),false),
+    )
+    .toDefinition("Reference[Publication]")
+
 
   implicit def enumCodingSchema[E <: Enumeration](
     implicit w: Witness.Aux[E]
@@ -164,10 +182,21 @@ trait Schemas extends BaseJsonSchemas
     Schema.`object`[Coding[RDDiagnosis.Category]](
       Field("code",codeSchema[Any]),
       Field("display",Schema.`string`,false),
-      Field("system",Schema.`string`(Schema.`string`.Format.`uri`),true),
+      Field(
+        "system",
+        Schema.`enum`[String](
+          Schema.`string`,
+          Set(
+            Coding.System[Orphanet],
+            Coding.System[ICD10GM]
+          )
+          .map(cs => Value.str(cs.uri.toString))
+        ),
+        true
+      ),
       Field("version",Schema.`string`,true)
     )
-    .toDefinition("Coding[Orphanet|ICD-10-GM|OMIM]")
+    .toDefinition("Coding[Diagnosis.Category]")
 
 
   implicit val diagnosisSchema: Schema[RDDiagnosis] =
@@ -185,17 +214,17 @@ trait Schemas extends BaseJsonSchemas
       .toDefinition("HPOTerm")
 
  
-  implicit val SmallVariantSchema: Schema[SmallVariant] =
+  implicit val smallVariantSchema: Schema[SmallVariant] =
     Json.schema[SmallVariant]
       .toDefinition("SmallVariant")
 
 
-  implicit val StructuralVariantSchema: Schema[StructuralVariant] =
+  implicit val structuralVariantSchema: Schema[StructuralVariant] =
     Json.schema[StructuralVariant]
       .toDefinition("StructuralVariant")
 
 
-  implicit val CopyNumberVariantSchema: Schema[CopyNumberVariant] =
+  implicit val copyNumberVariantSchema: Schema[CopyNumberVariant] =
     Json.schema[CopyNumberVariant]
       .toDefinition("CopyNumberVariant")
 
@@ -203,6 +232,11 @@ trait Schemas extends BaseJsonSchemas
   implicit val ngsReportSchema: Schema[RDNGSReport] =
     Json.schema[RDNGSReport]
       .toDefinition("NGSReport")
+
+
+  implicit val therapySchema: Schema[RDTherapy] =
+    Json.schema[RDTherapy]
+      .toDefinition("Therapy")
 
 
   implicit val patientRecordSchema: Schema[RDPatientRecord] =
