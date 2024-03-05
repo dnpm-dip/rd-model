@@ -48,6 +48,7 @@ trait Generators
     Gen.uuidStrings
        .map(ExternalId[T,S](_))
 
+
   implicit def genReference[T]: Gen[Reference[T]] =
     Gen.of[Id[T]]
       .map(Reference.from(_))
@@ -57,7 +58,7 @@ trait Generators
     Gen.oneOf(CodeSystem[S].concepts)
       .map(Coding.fromConcept(_))
 
-
+/*
   import shapeless.{Coproduct, :+:, CNil, Inl, Inr, Nat}
   import shapeless.ops.coproduct
   import shapeless.ops.nat.ToInt
@@ -71,11 +72,11 @@ trait Generators
   ): Gen[Coding[H :+: T]] =
     for {
       p <- Gen.doubles
-/*
+
       coding <-
         if (p < 1.0/(1 + lenAsInt())) genH
         else genT
-*/
+
       coding <- genH  
     } yield coding.asInstanceOf[Coding[H :+: T]]
 
@@ -84,11 +85,37 @@ trait Generators
     implicit genH: Gen[Coding[H]]
   ): Gen[Coding[H :+: CNil]] =
     genH.map(_.asInstanceOf[Coding[H :+: CNil]])
+*/
+
+  implicit val genHpoCoding: Gen[Coding[HPO]] =
+    Gen.oneOf(
+      "HP:0100861",
+      "HP:0100863",
+      "HP:0100864",
+      "HP:0100869",
+      "HP:0100871",
+      "HP:0100877"
+    )
+    .map(Coding[HPO](_))
 
 
 
+  implicit val genOrphanetCoding: Gen[Coding[Orphanet]] =
+    Gen.oneOf(
+      "ORPHA:98907",
+      "ORPHA:98897",
+      "ORPHA:98408",
+      "ORPHA:98375",
+      "ORPHA:984"
+    )
+    .map(Coding[Orphanet](_))
 
-//  implicit val genPubMedId: Gen[ExternalId[Publication]] =
+
+  implicit def genDiagnosisCatagoryCoding: Gen[Coding[RDDiagnosis.Category]] =
+    Gen.of[Coding[Orphanet]]
+      .map(_.asInstanceOf[Coding[RDDiagnosis.Category]])
+
+
   implicit val genPubMedId: Gen[Reference[Publication]] =
     Gen.ints
       .map(_.toString)
@@ -118,23 +145,12 @@ trait Generators
       )
 
 
-  implicit val genOrphanetCoding: Gen[Coding[Orphanet]] =
-    Gen.oneOf(
-      "ORPHA:98907",
-      "ORPHA:98897",
-      "ORPHA:98408",
-      "ORPHA:98375",
-      "ORPHA:984"
-    )
-    .map(Coding[Orphanet](_))
-
   implicit val genDiagnosis: Gen[RDDiagnosis] =
     for {
       id       <- Gen.of[Id[RDDiagnosis]]
       patient  <- Gen.of[Id[Patient]]
       date     <- Gen.const(LocalDate.now).map(Some(_))
       category <- Gen.of[Coding[RDDiagnosis.Category]]
-//      category <- Gen.of[Coding[Orphanet]]
       onsetAge <- Gen.intsBetween(12,42).map(Age(_))
       status   <- Gen.of[Coding[RDDiagnosis.Status.Value]]
     } yield
@@ -165,19 +181,8 @@ trait Generators
         Reference.to(patient),
         Some(ttan),
         Some(gmId),
-        diagnoses.map(Reference.to),
+        diagnoses.map(Reference.to(_)),
       )
-
-  implicit val genHpoCoding: Gen[Coding[HPO]] =
-    Gen.oneOf(
-      "HP:0100861",
-      "HP:0100863",
-      "HP:0100864",
-      "HP:0100869",
-      "HP:0100871",
-      "HP:0100877"
-    )
-    .map(Coding[HPO](_))
 
   implicit val genHPOTerm: Gen[HPOTerm] =
     for {

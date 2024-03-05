@@ -49,7 +49,7 @@ object RDDiagnosis
 {
 
   type Category =
-    Orphanet :+: ICD10GM :+: CNil
+    Orphanet :+: ICD10GM :+: OMIM :+: CNil
 
 
   object Status

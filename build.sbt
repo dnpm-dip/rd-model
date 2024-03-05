@@ -24,6 +24,7 @@ lazy val global = project
      dto_model,
      json_schema,
      hpo,
+     omim,
      orphanet,
      generators
   )
@@ -56,6 +57,16 @@ lazy val json_schema = project
 lazy val hpo = project
   .settings(
     name := "hp-ontology",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scalatest
+    )
+  )
+  .dependsOn(dto_model)
+
+lazy val omim = project
+  .settings(
+    name := "omim-catalog",
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest

@@ -14,4 +14,5 @@ Model components for RD use case in DNPM:DIP.
  
    * ORDO (Orphanet Rare Disease Ontology): This uses the unmodified [OWL ORDO](https://www.orphadata.com/ordo/) available under [CC BY 4.0 DEED](https://creativecommons.org/licenses/by/4.0/) license
 
+   * OMIM (Online Mendelian Inheritance in Man): This uses the unmodified, license-free OMIM entry list available at [https://www.omim.org/downloads](https://www.omim.org/downloads)
 
