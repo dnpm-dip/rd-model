@@ -30,38 +30,6 @@ import play.api.libs.json.{
 }
 
 
-
-final case class HPOTerm
-(
-  id: Id[HPOTerm],
-  patient: Reference[Patient],
-  value: Coding[HPO]
-)
-extends Observation[Coding[HPO]]
-
-object HPOTerm
-{
-   implicit val format: OFormat[HPOTerm] =
-    Json.format[HPOTerm]
-}
-
-
-final case class Autozygosity
-(
-  id: Id[Autozygosity],
-  patient: Reference[Patient],
-  value: Float
-)
-extends Observation[Float]
-
-object Autozygosity
-{
-   implicit val format: OFormat[Autozygosity] =
-    Json.format[Autozygosity]
-}
-
-
-/*
 object Chromosome
 extends CodedEnum("chromosome")
 with DefaultCodeSystem
@@ -99,6 +67,7 @@ with DefaultCodeSystem
   implicit val format: Format[Chromosome.Value] =
     Json.formatEnum(this)
 }
+
 
 object ACMG
 {
@@ -411,6 +380,19 @@ object Variant
   }
 
 
+
+  implicit val displays: Displays[Variant] =
+    Displays {
+      case sv: SmallVariant =>
+        s"SmallVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.display).getOrElse("")}"
+
+      case sv: StructuralVariant =>
+        s"StructuralVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.display).getOrElse("")}"
+
+      case cnv: CopyNumberVariant =>
+        s"CNV ${cnv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")} ${cnv.proteinChange.orElse(cnv.gDNAChange).orElse(cnv.cDNAChange).map(_.display).getOrElse("")}"
+    }
+
 } // End object Variant
 
 
@@ -521,5 +503,3 @@ object CopyNumberVariant
   implicit val format: OFormat[CopyNumberVariant] =
     Json.format[CopyNumberVariant]
 }
-*/
-

@@ -46,9 +46,9 @@ lazy val json_schema = project
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
-      dependencies.scala_jsonschema,
-      dependencies.scala_jsonschema_cats,
-      dependencies.scala_jsonschema_play,
+//      dependencies.scala_jsonschema,
+//      dependencies.scala_jsonschema_cats,
+//      dependencies.scala_jsonschema_play,
 
     )
   )
@@ -111,9 +111,9 @@ lazy val dependencies =
     val scala_xml             = "org.scala-lang.modules" %% "scala-xml"                  % "2.0.1"
     val core                  = "de.dnpm.dip"            %% "core"                       % "1.0-SNAPSHOT"
     val generators            = "de.ekut.tbi"            %% "generators"                 % "1.0-SNAPSHOT"
-    val scala_jsonschema      = "com.github.andyglow"    %% "scala-jsonschema"           % "0.7.11"
-    val scala_jsonschema_cats = "com.github.andyglow"    %% "scala-jsonschema-cats"      % "0.7.11"
-    val scala_jsonschema_play = "com.github.andyglow"    %% "scala-jsonschema-play-json" % "0.7.11"
+//    val scala_jsonschema      = "com.github.andyglow"    %% "scala-jsonschema"           % "0.7.11"
+//    val scala_jsonschema_cats = "com.github.andyglow"    %% "scala-jsonschema-cats"      % "0.7.11"
+//    val scala_jsonschema_play = "com.github.andyglow"    %% "scala-jsonschema-play-json" % "0.7.11"
 
   }
 

@@ -38,7 +38,6 @@ final case class RDDiagnosis
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
   categories: NonEmptyList[Coding[RDDiagnosis.Category]],
-//  categories: NonEmptyList[Coding[Any]],
   onsetAge: Option[Age],
   prenatal: Boolean,
   status: Coding[RDDiagnosis.Status.Value]
