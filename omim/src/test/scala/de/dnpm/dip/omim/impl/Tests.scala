@@ -48,5 +48,11 @@ class Tests extends AnyFlatSpec
 
   }
 
+  "Property 'entry type'" must "be defined on all entries" in {
+
+    all (omim.concepts.map(_.get(OMIM.EntryType).flatMap(_.headOption))) must be (defined)
+
+  }
+
 
 }

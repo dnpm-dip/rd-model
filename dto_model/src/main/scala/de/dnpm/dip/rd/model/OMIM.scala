@@ -40,6 +40,21 @@ object OMIM extends CodeSystem.Publisher[OMIM]
     )
 
 
+  object extensions
+  {
+
+    implicit class OmimConceptExtensions(val c: CodeSystem.Concept[OMIM]) extends AnyVal
+    {
+      def entryType: String =
+        c.get(EntryType)
+         .get
+         .head  // always defined
+    }
+  }
+
+
+
+
   trait Catalog[F[_],Env] extends CodeSystemProvider[OMIM,F,Env]
 
 

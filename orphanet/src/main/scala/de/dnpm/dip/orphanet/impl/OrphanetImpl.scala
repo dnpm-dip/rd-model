@@ -53,7 +53,7 @@ object OrphanetImpl
       OwlOrdoParser.read(
         this.getClass
           .getClassLoader
-          .getResourceAsStream("ORDO_de_4.3.owl")
+          .getResourceAsStream("ORDO.owl")
       )
   }
 
