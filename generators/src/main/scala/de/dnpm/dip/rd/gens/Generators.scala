@@ -122,13 +122,22 @@ trait Generators
       .map(ExternalId[Publication,PubMed](_))
       .map(Reference.from(_))
 
+  private val genGender: Gen[Coding[Gender.Value]] =
+    Gen.distribution(
+      48.0 -> Gender.Male,
+      48.0 -> Gender.Female,
+      4.0  -> Gender.Other,
+    )
+    .map(Coding(_))
 
   implicit val genPatient: Gen[Patient] =
     for {
       id <-
         Gen.of[Id[Patient]]
+
       gender <-
-        Gen.of[Coding[Gender.Value]]
+        genGender
+        
       birthdate <-
         localDatesBetween(
           LocalDate.now.minusYears(70),

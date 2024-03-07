@@ -50,25 +50,8 @@ trait Schemas extends BaseSchemas
 
 
   implicit val diagnosisCategoryCoding: Schema[Coding[RDDiagnosis.Category]] =
-    Schema.`object`[Coding[RDDiagnosis.Category]](
-      Field("code",codeSchema[Any]),
-      Field("display",Schema.`string`,false),
-      Field(
-        "system",
-        Schema.`enum`[String](
-          Schema.`string`,
-          Set(
-            Coding.System[Orphanet],
-            Coding.System[OMIM],
-            Coding.System[ICD10GM]
-          )
-          .map(cs => Value.str(cs.uri.toString))
-        ),
-        true
-      ),
-      Field("version",Schema.`string`,false)
-    )
-    .toDefinition("Coding[Diagnosis.Category]")
+    coproductCodingSchema[RDDiagnosis.Category]
+//      .toDefinition("Coding[Diagnosis.Category]")
 
 
   implicit val diagnosisSchema: Schema[RDDiagnosis] =

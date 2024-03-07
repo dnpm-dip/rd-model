@@ -1,6 +1,7 @@
 package de.dnpm.dip.rd.model.json
 
 
+import java.io.{File,FileWriter}
 import scala.util.chaining._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers._
@@ -20,11 +21,18 @@ class Tests extends AnyFlatSpec
   import Schemas._
 
 
-  "JSON Schema derivation for MTBPatientRecord" must "have worked" in {
+  "JSON Schema derivation for RDPatientRecord" must "have worked" in {
 
     Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
       .pipe(prettyPrint(_))
       .tap(println(_))
+      .tap { js =>
+        val writer =
+          new FileWriter(new File("/home/lucien/rd_patient_record_schema.json"))
+
+        writer.write(js)
+        writer.close
+      }
 
     succeed
   }
