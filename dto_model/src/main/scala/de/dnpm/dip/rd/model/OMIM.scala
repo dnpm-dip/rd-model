@@ -29,8 +29,8 @@ object OMIM extends CodeSystem.Publisher[OMIM]
 
   val EntryType =
     CodeSystem.Property[String](
-      "kind",
-      Some("Kind of ICD class")
+      "EntryType",
+      Some("Type of OMIM entry")
     )
 
 

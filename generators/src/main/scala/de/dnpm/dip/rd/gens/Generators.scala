@@ -117,7 +117,7 @@ trait Generators
 
 
   implicit val genPubMedId: Gen[Reference[Publication]] =
-    Gen.ints
+    Gen.positiveInts
       .map(_.toString)
       .map(ExternalId[Publication,PubMed](_))
       .map(Reference.from(_))

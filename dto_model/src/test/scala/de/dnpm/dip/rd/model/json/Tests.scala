@@ -1,4 +1,4 @@
-package de.dnpm.dip.rd.json.schema
+package de.dnpm.dip.rd.model.json
 
 
 import scala.util.chaining._
