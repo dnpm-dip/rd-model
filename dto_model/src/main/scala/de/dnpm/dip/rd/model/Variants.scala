@@ -382,7 +382,7 @@ object Variant
 
 
   implicit val displays: Displays[Variant] =
-    Displays {
+    Displays[Variant]{
       case sv: SmallVariant =>
         s"SmallVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.display).getOrElse("")}"
 

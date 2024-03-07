@@ -6,7 +6,7 @@
 
 name := "rd-model"
 ThisBuild / organization := "de.dnpm.dip"
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.13"
 ThisBuild / version      := "1.0-SNAPSHOT"
 
 
@@ -22,7 +22,6 @@ lazy val global = project
   )
   .aggregate(
      dto_model,
-//     json_schema,
      hpo,
      omim,
      orphanet,
@@ -40,17 +39,6 @@ lazy val dto_model = project
     )
   )
 
-/*
-lazy val json_schema = project
-  .settings(
-    name := "rd-json-schema",
-    settings,
-    libraryDependencies ++= Seq(
-      dependencies.scalatest,
-    )
-  )
-  .dependsOn(dto_model)
-*/
 
 lazy val hpo = project
   .settings(

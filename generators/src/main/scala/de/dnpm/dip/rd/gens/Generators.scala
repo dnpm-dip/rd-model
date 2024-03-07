@@ -287,7 +287,7 @@ trait Generators
       pat   <- Gen.of[Id[Patient]]
       chr   <- Gen.of[Coding[Chromosome.Value]]
       gene  <- Gen.of[Coding[HGNC]]
-      pos   <- Gen.ints
+      pos   <- Gen.positiveInts
       ref   <- Gen.oneOf(bases)
       alt   <- Gen.oneOf((bases.toSet - ref).toSeq)
       dnaChg <- Gen.oneOf(gDNAChanges)
@@ -371,8 +371,8 @@ trait Generators
       pat   <- Gen.of[Id[Patient]]
       chr   <- Gen.of[Coding[Chromosome.Value]]
       gene  <- Gen.of[Coding[HGNC]]
-      start <- Gen.ints
-      end   <- Gen.ints
+      start <- Gen.positiveInts
+      end   <- Gen.positiveInts
       typ   <- Gen.of[Coding[CopyNumberVariant.Type.Value]]
       dnaChg <- Gen.oneOf(gDNAChanges)
       proteinChg <- Gen.oneOf(proteinChanges)
