@@ -88,7 +88,7 @@ object RDNGSReport
     override val display =
       Map(
         single -> "single",
-        duo    ->"duo",
+        duo    -> "duo",
         trio   -> "trio",  
         Gt3    -> ">3"
       )

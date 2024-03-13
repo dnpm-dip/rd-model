@@ -21,9 +21,12 @@ final case class RDPatientRecord
   episodes: NonEmptyList[RDCase],
   diagnosis: RDDiagnosis,
   hpoTerms: NonEmptyList[HPOTerm],
-  ngsReports: NonEmptyList[RDNGSReport],
+  ngsReports: Option[List[RDNGSReport]],
   therapy: Option[RDTherapy]
 )
+{
+  def getNgsReports = ngsReports.getOrElse(List.empty)
+}
 
 object RDPatientRecord
 {

@@ -191,6 +191,7 @@ trait Generators
         Some(ttan),
         Some(gmId),
         diagnoses.map(Reference.to(_)),
+        Some(Coding(RDCase.StatusReason.NoSequencingRequested))
       )
 
   implicit val genHPOTerm: Gen[HPOTerm] =
@@ -505,7 +506,7 @@ trait Generators
         NonEmptyList.one(cse),
         diag,
         NonEmptyList.fromListUnsafe(hpoTerms),
-        NonEmptyList.one(ngsReport),
+        Some(List(ngsReport)),
         Some(therapy)
       )
 

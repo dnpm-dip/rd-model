@@ -23,7 +23,9 @@ class Tests extends AnyFlatSpec
 
   "JSON Schema derivation for RDPatientRecord" must "have worked" in {
 
-    Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
+//    Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
+//    Schema[RDPatientRecord].asPlay(Draft07("RD-Patient-Record"))
+    Schema[RDPatientRecord].asPlay(Draft04())
       .pipe(prettyPrint(_))
       .tap(println(_))
       .tap { js =>

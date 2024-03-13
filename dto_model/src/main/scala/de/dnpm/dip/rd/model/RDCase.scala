@@ -3,7 +3,11 @@ package de.dnpm.dip.rd.model
 
 import java.time.LocalDate
 import cats.Applicative
-import de.dnpm.dip.coding.Coding
+import de.dnpm.dip.coding.{
+  CodedEnum,
+  Coding,
+  DefaultCodeSystem
+}
 import de.dnpm.dip.model.{
   Id,
   Episode,
@@ -37,13 +41,29 @@ final case class RDCase
 //  status: Coding[Episode.Status.Value],
 //  recordedOn: Option[LocalDate],
 //  period: Period[LocalDate],
-  diagnoses: List[Reference[RDDiagnosis]]
+  diagnoses: List[Reference[RDDiagnosis]],
+  statusReason: Option[Coding[RDCase.StatusReason.Value]]
 )
 extends Episode
 
 
 object RDCase
 {
+
+  object StatusReason
+  extends CodedEnum("dnpm-dip/rd/case/status-reason")
+  with DefaultCodeSystem
+  {
+
+    val NoSequencingRequested = Value("no-sequencing-requested")
+
+    override val display =
+      Map(
+        NoSequencingRequested -> "Keine Sequenzierung veranlasst"
+      )
+
+  }
+
   implicit val format: OFormat[RDCase] =
     Json.format[RDCase]
 }
