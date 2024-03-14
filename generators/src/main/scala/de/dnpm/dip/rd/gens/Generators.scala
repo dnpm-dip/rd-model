@@ -423,7 +423,7 @@ trait Generators
 
       metaInfo <-
         for {
-          platform <- Gen.of[Coding[RDNGSReport.Platform]]
+          platform <- Gen.of[Coding[RDNGSReport.Platform.Value]]
         } yield RDNGSReport.SequencingInfo(
           platform,
           "Kit..."

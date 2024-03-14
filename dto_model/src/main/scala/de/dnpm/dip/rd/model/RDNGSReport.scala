@@ -104,22 +104,21 @@ object RDNGSReport
 
   sealed trait Platform
   object Platform
+  extends CodedEnum("/dnpm-dip/rd/ngs/sequencing/platform")
+  with DefaultCodeSystem
   {
-    implicit val system: Coding.System[Platform] =
-      Coding.System[Platform]("/dnpm-dip/rd/ngs/sequencing/platform")
+    val Illumina     = Value("Illumina")
+    val ONT          = Value("ONT")
+    val TenXGenomics = Value("10X-Genomics")
+    val PacBio       = Value("PacBio")
 
-    implicit val codeSystem: CodeSystem[Platform] =
-      CodeSystem[Platform](
-        name = "Sequencing-Platform",
-        title = Some("Sequencing Platform"),
-        version = None,
-        "Illumina"     -> "Illumina",
-        "ONT"          -> "ONT",
-        "10X-Genomics" -> "10X Genomics",
-        "PacBio"       -> "PacBio"
+    override val display =
+      Map(
+        Illumina     -> "Illumina",
+        ONT          -> "ONT",
+        TenXGenomics -> "10X Genomics",
+        PacBio       -> "PacBio"
       )
-
-    object Provider extends SingleCodeSystemProvider[Platform]
 
     final class ProviderSPI extends CodeSystemProviderSPI
     {
@@ -132,7 +131,7 @@ object RDNGSReport
 
   final case class SequencingInfo
   (
-    platform: Coding[Platform],
+    platform: Coding[Platform.Value],
     kit: String
   )
 

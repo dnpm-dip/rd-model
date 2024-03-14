@@ -21,7 +21,7 @@ class CodeSystemTests extends AnyFlatSpec
         Coding.System[RDDiagnosis.Status.Value].uri,
         Coding.System[RDNGSReport.Type.Value].uri,
         Coding.System[RDNGSReport.FamilyControlLevel.Value].uri,
-        Coding.System[RDNGSReport.Platform].uri,
+        Coding.System[RDNGSReport.Platform.Value].uri,
         Coding.System[ACMG.Class.Value].uri,
         Coding.System[ACMG.Criterion.Type.Value].uri,
         Coding.System[ACMG.Criterion.Modifier.Value].uri,
