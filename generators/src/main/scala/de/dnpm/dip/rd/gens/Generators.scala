@@ -245,7 +245,7 @@ trait Generators
       "LRG_199t1:c.85=/T>C",
       "NM_004006.2:c.123=",
     )
-    .map(Coding[HGVS](_))
+    .map(Coding[HGVS.DNA](_))
 
   // Source: https://varnomen.hgvs.org/recommendations/DNA/variant/duplication/
   private val gDNAChanges =
@@ -256,7 +256,7 @@ trait Generators
       "NC_000023.11:g.pter_qtersup",
       "NC_000023.11:g.33344590_33344592=/dup",
     )
-    .map(Coding[HGVS](_))
+    .map(Coding[HGVS.DNA](_))
 
   private val proteinChanges =
     Seq(
@@ -266,7 +266,7 @@ trait Generators
       "LRG_199p1:p.Trp24=/Cys",
       "NP_003997.2:p.Val7dup",
     )
-    .map(Coding[HGVS](_))
+    .map(Coding[HGVS.Protein](_))
 
 
   implicit val genAcmgCriterion: Gen[ACMG.Criterion] =

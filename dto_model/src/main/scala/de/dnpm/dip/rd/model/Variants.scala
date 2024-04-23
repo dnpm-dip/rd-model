@@ -249,9 +249,9 @@ sealed abstract class Variant
   val id: Id[Variant]
   val patient: Reference[Patient]
   val genes: Option[Set[Coding[HGNC]]]
-  val cDNAChange: Option[Coding[HGVS]]
-  val gDNAChange: Option[Coding[HGVS]]
-  val proteinChange: Option[Coding[HGVS]]
+  val cDNAChange: Option[Coding[HGVS.DNA]]
+  val gDNAChange: Option[Coding[HGVS.DNA]]
+  val proteinChange: Option[Coding[HGVS.Protein]]
   val acmgClass: Coding[ACMG.Class.Value]
   val acmgCriteria: Option[Set[ACMG.Criterion]]
   val zygosity: Coding[Variant.Zygosity.Value]
@@ -406,9 +406,9 @@ final case class SmallVariant
   position: Int,
   ref: String,
   alt: String,
-  cDNAChange: Option[Coding[HGVS]],
-  gDNAChange: Option[Coding[HGVS]],
-  proteinChange: Option[Coding[HGVS]],
+  cDNAChange: Option[Coding[HGVS.DNA]],
+  gDNAChange: Option[Coding[HGVS.DNA]],
+  proteinChange: Option[Coding[HGVS.Protein]],
   acmgClass: Coding[ACMG.Class.Value],
   acmgCriteria: Option[Set[ACMG.Criterion]],
   zygosity: Coding[Variant.Zygosity.Value],
@@ -433,9 +433,9 @@ final case class StructuralVariant
   patient: Reference[Patient],
   genes: Option[Set[Coding[HGNC]]],
   iscnDescription: Option[Coding[ISCN]],
-  cDNAChange: Option[Coding[HGVS]],
-  gDNAChange: Option[Coding[HGVS]],
-  proteinChange: Option[Coding[HGVS]],
+  cDNAChange: Option[Coding[HGVS.DNA]],
+  gDNAChange: Option[Coding[HGVS.DNA]],
+  proteinChange: Option[Coding[HGVS.Protein]],
   acmgClass: Coding[ACMG.Class.Value],
   acmgCriteria: Option[Set[ACMG.Criterion]],
   zygosity: Coding[Variant.Zygosity.Value],
@@ -463,9 +463,9 @@ final case class CopyNumberVariant
   startPosition: Int,
   endPosition: Int,
   `type`: Coding[CopyNumberVariant.Type.Value],
-  cDNAChange: Option[Coding[HGVS]],
-  gDNAChange: Option[Coding[HGVS]],
-  proteinChange: Option[Coding[HGVS]],
+  cDNAChange: Option[Coding[HGVS.DNA]],
+  gDNAChange: Option[Coding[HGVS.DNA]],
+  proteinChange: Option[Coding[HGVS.Protein]],
   acmgClass: Coding[ACMG.Class.Value],
   acmgCriteria: Option[Set[ACMG.Criterion]],
   zygosity: Coding[Variant.Zygosity.Value],
