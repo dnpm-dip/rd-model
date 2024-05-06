@@ -1,7 +1,5 @@
 de.dnpm.dip.rd.model.RDDiagnosis$Status$ProviderSPI
-de.dnpm.dip.rd.model.RDNGSReport$Type$ProviderSPI
 de.dnpm.dip.rd.model.RDNGSReport$FamilyControlLevel$ProviderSPI
-de.dnpm.dip.rd.model.RDNGSReport$Platform$ProviderSPI
 de.dnpm.dip.rd.model.ACMG$Class$ProviderSPI
 de.dnpm.dip.rd.model.ACMG$Criterion$Type$ProviderSPI
 de.dnpm.dip.rd.model.ACMG$Criterion$Modifier$ProviderSPI

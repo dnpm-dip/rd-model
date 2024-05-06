@@ -22,6 +22,7 @@ import de.dnpm.dip.model.{
   ExternalId,
   Reference,
   Gender,
+  NGSReport,
   Patient,
   Period,
   Publication,
@@ -418,12 +419,12 @@ trait Generators
       id  <- Gen.of[Id[RDNGSReport]]
       pat <- Gen.of[Id[Patient]]
       lab <- Gen.of[Id[Lab]].map(Reference.from(_).copy(display = Some("Lab name")))
-      typ <- Gen.of[Coding[RDNGSReport.Type.Value]]
+      typ <- Gen.of[Coding[NGSReport.SequencingType.Value]]
       familyControl <- Gen.of[Coding[RDNGSReport.FamilyControlLevel.Value]]
 
       metaInfo <-
         for {
-          platform <- Gen.of[Coding[RDNGSReport.Platform.Value]]
+          platform <- Gen.of[Coding[NGSReport.Platform.Value]]
         } yield RDNGSReport.SequencingInfo(
           platform,
           "Kit..."

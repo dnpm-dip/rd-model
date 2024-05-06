@@ -12,9 +12,9 @@ import de.dnpm.dip.coding.{
   CodeSystemProviderSPI,
   SingleCodeSystemProvider
 }
-
 import de.dnpm.dip.model.{
   Id,
+  NGSReport,
   Patient,
   Reference
 }
@@ -32,7 +32,7 @@ final case class RDNGSReport
   patient: Reference[Patient],
   performingLab: Reference[Lab],
   recordedOn: Option[LocalDate],
-  `type`: Coding[RDNGSReport.Type.Value],
+  sequencingType: Coding[NGSReport.SequencingType.Value],
   familyControls: Coding[RDNGSReport.FamilyControlLevel.Value],
   sequencingInfo: RDNGSReport.SequencingInfo,
   autozygosity: Option[Autozygosity],
@@ -49,33 +49,6 @@ final case class RDNGSReport
 
 object RDNGSReport
 {
-
-  sealed trait Type
-  object Type
-  extends CodedEnum("dnpm-dip/rd/ngs-report/type")
-  with DefaultCodeSystem
-  {
-    val panel, exome, array = Value            
-
-    val genomeShortRead = Value("genome-short-read")
-    val genomeLongRead  = Value("genome-long-read")
-
-    override val display =
-      Map(
-        panel           -> "Panel",
-        exome           -> "Exome",
-        genomeShortRead -> "Genome short-read",
-        genomeLongRead  -> "Genome long-read",
-        array           -> "Array"
-      )
-
-    final class ProviderSPI extends CodeSystemProviderSPI
-    {
-      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
-        new Provider.Facade[F]
-    }
-
-  }
 
   sealed trait FamilyControlLevel
   object FamilyControlLevel
@@ -101,37 +74,9 @@ object RDNGSReport
 
   }
 
-
-  sealed trait Platform
-  object Platform
-  extends CodedEnum("/dnpm-dip/rd/ngs/sequencing/platform")
-  with DefaultCodeSystem
-  {
-    val Illumina     = Value("Illumina")
-    val ONT          = Value("ONT")
-    val TenXGenomics = Value("10X-Genomics")
-    val PacBio       = Value("PacBio")
-
-    override val display =
-      Map(
-        Illumina     -> "Illumina",
-        ONT          -> "ONT",
-        TenXGenomics -> "10X Genomics",
-        PacBio       -> "PacBio"
-      )
-
-    final class ProviderSPI extends CodeSystemProviderSPI
-    {
-      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
-        new Provider.Facade[F]
-    }
-
-  }
-
-
   final case class SequencingInfo
   (
-    platform: Coding[Platform.Value],
+    platform: Coding[NGSReport.Platform.Value],
     kit: String
   )
 
