@@ -25,7 +25,8 @@ lazy val global = project
      hpo,
      omim,
      orphanet,
-     generators
+     generators,
+     tests
   )
 
 
@@ -39,20 +40,9 @@ lazy val dto_model = project
     )
   )
 
-
 lazy val hpo = project
   .settings(
     name := "hp-ontology",
-    settings,
-    libraryDependencies ++= Seq(
-      dependencies.scalatest
-    )
-  )
-  .dependsOn(dto_model)
-
-lazy val omim = project
-  .settings(
-    name := "omim-catalog",
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest
@@ -71,6 +61,15 @@ lazy val orphanet = project
   )
   .dependsOn(dto_model)
 
+lazy val omim = project
+  .settings(
+    name := "omim-catalog",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scalatest
+    )
+  )
+  .dependsOn(dto_model)
 
 lazy val generators = project
   .settings(
@@ -85,6 +84,24 @@ lazy val generators = project
     dto_model
   )
 
+lazy val tests = project
+  .settings(
+    name := "tests",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scalatest,
+      dependencies.icd10gm,
+      dependencies.icd_catalogs
+    ),
+    publish / skip := true
+  )
+  .dependsOn(
+    dto_model,
+    orphanet % Test,
+    omim % Test,
+  )
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -93,10 +110,12 @@ lazy val generators = project
 
 lazy val dependencies =
   new {
-    val scalatest             = "org.scalatest"          %% "scalatest"                  % "3.2.17" % Test
-    val scala_xml             = "org.scala-lang.modules" %% "scala-xml"                  % "2.0.1"
-    val core                  = "de.dnpm.dip"            %% "core"                       % "1.0-SNAPSHOT"
-    val generators            = "de.ekut.tbi"            %% "generators"                 % "1.0-SNAPSHOT"
+    val scalatest    = "org.scalatest"          %% "scalatest"          % "3.2.17" % Test
+    val scala_xml    = "org.scala-lang.modules" %% "scala-xml"          % "2.0.1"
+    val core         = "de.dnpm.dip"            %% "core"               % "1.0-SNAPSHOT"
+    val generators   = "de.ekut.tbi"            %% "generators"         % "1.0-SNAPSHOT"
+    val icd10gm      = "de.dnpm.dip"            %% "icd10gm-impl"       % "1.0-SNAPSHOT" % Test
+    val icd_catalogs = "de.dnpm.dip"            %% "icd-claml-packaged" % "1.0-SNAPSHOT" % Test
   }
 
 
