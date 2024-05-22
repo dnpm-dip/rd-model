@@ -127,20 +127,17 @@ object OwlOrdoParser
                   Orphanet.SuperClasses.name -> codes
               }
 
-            val icd10Code =
-              (cl \ "hasDbXref")
-                .map(_.text)
-                .collectFirst {
-                  case ICD10(code) => Orphanet.ICD10Code.name -> Set(code)
-                }
+            val icd10Codes =
+                (cl \ "hasDbXref")
+                  .map(_.text)
+                  .collect { case ICD10(code) => code }
+                  .toSet
             
-            val icd11Code =
-              (cl \ "hasDbXref")
-                .map(_.text)
-                .collectFirst {
-                  case ICD11(code) => Orphanet.ICD11Code.name -> Set(code)
-                }
-            
+            val icd11Codes =
+                (cl \ "hasDbXref")
+                  .map(_.text)
+                  .collect { case ICD11(code) => code }
+                  .toSet
             
             CodeSystem.Concept[Orphanet](
               code = orphaCode,
@@ -148,9 +145,9 @@ object OwlOrdoParser
               version = theVersion,
               properties =
                 Map.empty ++
-                  superClasses ++
-                  icd10Code ++
-                  icd11Code ++
+                  superClasses +
+                  (Orphanet.ICD10Codes.name -> icd10Codes) +
+                  (Orphanet.ICD11Codes.name -> icd11Codes) ++
                   alternativeTerms,
               parent = None,  // Given the multiple inheritance in ORDO, leave single parent undefined
               children = None // Requires a subsequent iteration below,

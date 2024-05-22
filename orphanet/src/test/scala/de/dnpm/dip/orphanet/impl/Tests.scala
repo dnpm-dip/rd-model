@@ -58,14 +58,14 @@ class Tests extends AnyFlatSpec
 
   it must "contain ICD-10-Codes on some concepts" in {
 
-    atLeast (1, ordo.concepts.map(_.icd10Code)) must be (defined)
+    atLeast (1, ordo.concepts.map(_.icd10Codes)) must not be (empty)
 
   }
 
 
   it must "contain ICD-11-Codes on some concepts" in {
 
-    atLeast (1, ordo.concepts.map(_.icd11Code)) must be (defined)
+    atLeast (1, ordo.concepts.map(_.icd11Codes)) must not be (empty)
 
   }
 

@@ -44,17 +44,17 @@ object Orphanet extends CodeSystem.Publisher[Orphanet]
       valueSet = None
     )
 
-  val ICD10Code =
+  val ICD10Codes =
     CodeSystem.Property[String](
-      name = "ICD-10-Code",
-      description = Some("Corresponding ICD-10 code of the ORDO concept"),
+      name = "ICD-10-Codes",
+      description = Some("Corresponding ICD-10 codes of the ORDO concept"),
       valueSet = None
     )
 
-  val ICD11Code =
+  val ICD11Codes =
     CodeSystem.Property[String](
-      name = "ICD-11-Code",
-      description = Some("Corresponding ICD-11 code of the ORDO concept"),
+      name = "ICD-11-Codes",
+      description = Some("Corresponding ICD-11 codes of the ORDO concept"),
       valueSet = None
     )
 
@@ -63,8 +63,8 @@ object Orphanet extends CodeSystem.Publisher[Orphanet]
     List(
       SuperClasses,
       AlternativeTerms,      
-      ICD10Code,
-      ICD11Code
+      ICD10Codes,
+      ICD11Codes
     )
 
 
@@ -83,15 +83,16 @@ object Orphanet extends CodeSystem.Publisher[Orphanet]
         concept.get(AlternativeTerms)
           .getOrElse(Set.empty)
 
-      def icd10Code: Option[Code[ICD10GM]] =
-        concept.get(ICD10Code)
-          .flatMap(_.headOption)
+      def icd10Codes: Set[Code[ICD10GM]] =
+        concept.get(ICD10Codes)
+          .getOrElse(Set.empty)
           .map(Code[ICD10GM](_))
 
-      def icd11Code: Option[Code[ICD11]] =
-        concept.get(ICD11Code)
-          .flatMap(_.headOption)
+      def icd11Codes: Set[Code[ICD11]] =
+        concept.get(ICD11Codes)
+          .getOrElse(Set.empty)
           .map(Code[ICD11](_))
+
     }
 
   }

@@ -38,7 +38,6 @@ final case class RDCase
   patient: Reference[Patient],
   transferTan: Option[Id[TransferTAN]],
   gestaltMatcherId: Option[ExternalId[RDCase]], 
-//  status: Coding[Episode.Status.Value],
 //  recordedOn: Option[LocalDate],
 //  period: Period[LocalDate],
   diagnoses: List[Reference[RDDiagnosis]],
