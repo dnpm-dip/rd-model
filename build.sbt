@@ -76,8 +76,10 @@ lazy val generators = project
     name := "rd-dto-generators",
     settings,
     libraryDependencies ++= Seq(
+      dependencies.scalatest,
       dependencies.generators,
-      dependencies.scalatest
+      dependencies.atc_impl,
+      dependencies.atc_catalogs
     )
   )
   .dependsOn(
@@ -110,12 +112,14 @@ lazy val tests = project
 
 lazy val dependencies =
   new {
-    val scalatest    = "org.scalatest"          %% "scalatest"          % "3.2.17" % Test
-    val scala_xml    = "org.scala-lang.modules" %% "scala-xml"          % "2.0.1"
-    val core         = "de.dnpm.dip"            %% "core"               % "1.0-SNAPSHOT"
-    val generators   = "de.ekut.tbi"            %% "generators"         % "1.0-SNAPSHOT"
-    val icd10gm      = "de.dnpm.dip"            %% "icd10gm-impl"       % "1.0-SNAPSHOT" % Test
-    val icd_catalogs = "de.dnpm.dip"            %% "icd-claml-packaged" % "1.0-SNAPSHOT" % Test
+    val scalatest    = "org.scalatest"          %% "scalatest"              % "3.2.17" % Test
+    val scala_xml    = "org.scala-lang.modules" %% "scala-xml"              % "2.0.1"
+    val core         = "de.dnpm.dip"            %% "core"                   % "1.0-SNAPSHOT"
+    val generators   = "de.ekut.tbi"            %% "generators"             % "1.0-SNAPSHOT"
+    val icd10gm      = "de.dnpm.dip"            %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
+    val icd_catalogs = "de.dnpm.dip"            %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
+    val atc_impl     = "de.dnpm.dip"            %% "atc-impl"               % "1.0-SNAPSHOT" % Test
+    val atc_catalogs = "de.dnpm.dip"            %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
   }
 
 

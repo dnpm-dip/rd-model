@@ -102,8 +102,8 @@ trait Completers
     Completer.of(
       diag =>
         diag.copy(
-          categories = diag.categories.complete, 
-          status     = diag.status.complete
+          categories         = diag.categories.complete, 
+          verificationStatus = diag.verificationStatus.complete
         )
     )
 

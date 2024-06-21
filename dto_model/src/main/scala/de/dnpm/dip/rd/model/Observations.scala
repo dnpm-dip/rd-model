@@ -1,7 +1,10 @@
 package de.dnpm.dip.rd.model
 
 
-
+import java.time.{
+  LocalDate,
+  YearMonth
+}
 import cats.Applicative
 import de.dnpm.dip.coding.{
   Coding,
@@ -35,14 +38,47 @@ final case class HPOTerm
 (
   id: Id[HPOTerm],
   patient: Reference[Patient],
-  value: Coding[HPO]
+  onsetDate: YearMonth,
+  value: Coding[HPO],
+  statusHistory: Option[List[HPOTerm.Status]]
 )
 extends Observation[Coding[HPO]]
 
 object HPOTerm
 {
-   implicit val format: OFormat[HPOTerm] =
-    Json.format[HPOTerm]
+
+  object Status
+  extends CodedEnum("dnpm-dip/rd/hpo-term/status")
+  with DefaultCodeSystem
+  {
+
+    val Improved = Value("improved")
+    val Worsened = Value("worsened")
+    val Resolved = Value("resolved")
+
+    override val display =
+      Map(
+        Improved -> "Verbessert",
+        Worsened -> "Verschlechtert",
+        Resolved -> "Weggefallen"
+      )
+
+  }
+
+  final case class Status
+  (
+    status: Coding[Status.Value],
+    date: LocalDate
+  )
+
+
+  import de.dnpm.dip.util.json._
+
+  implicit val formatStatus: OFormat[Status] =
+    Json.format[Status]
+
+  implicit val format: OFormat[HPOTerm] =
+   Json.format[HPOTerm]
 }
 
 

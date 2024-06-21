@@ -58,9 +58,19 @@ trait Schemas extends BaseSchemas
       .toDefinition("Diagnosis")
 
 
-  implicit val caseSchema: Schema[RDCase] =
-    Json.schema[RDCase]
-      .toDefinition("Case")
+  implicit val gmfcsSchema: Schema[GMFCSStatus] =
+    Json.schema[GMFCSStatus]
+      .toDefinition("GMFCS-Status")
+
+
+  implicit val hospitalizationSchema: Schema[Hospitalization] =
+    Json.schema[Hospitalization]
+      .toDefinition("Hospitalization")
+
+
+  implicit val episodeSchema: Schema[RDEpisodeOfCare] =
+    Json.schema[RDEpisodeOfCare]
+      .toDefinition("EpisodeOfCare")
 
 
   implicit val hpoTermSchema: Schema[HPOTerm] =
@@ -86,6 +96,26 @@ trait Schemas extends BaseSchemas
   implicit val ngsReportSchema: Schema[RDNGSReport] =
     Json.schema[RDNGSReport]
       .toDefinition("NGSReport")
+
+
+  implicit val therapyRecommendationSchema: Schema[RDTherapyRecommendation] =
+    Json.schema[RDTherapyRecommendation]
+      .toDefinition("TherapyRecommendation")
+
+
+  implicit val studyEnrollmentRecommendationSchema: Schema[RDStudyEnrollmentRecommendation] =
+    Json.schema[RDStudyEnrollmentRecommendation]
+      .toDefinition("StudyEnrollmentRecommendation")
+
+
+  implicit val clinicalManagementRecommendationSchema: Schema[ClinicalManagementRecommendation] =
+    Json.schema[ClinicalManagementRecommendation]
+      .toDefinition("ClinicalManagementRecommendation")
+
+
+  implicit val carePlanSchema: Schema[RDCarePlan] =
+    Json.schema[RDCarePlan]
+      .toDefinition("CarePlan")
 
 
   implicit val therapySchema: Schema[RDTherapy] =

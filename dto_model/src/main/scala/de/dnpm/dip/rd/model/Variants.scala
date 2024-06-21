@@ -249,6 +249,7 @@ sealed abstract class Variant
   val id: Id[Variant]
   val patient: Reference[Patient]
   val genes: Option[Set[Coding[HGNC]]]
+  val localization: Option[Set[Coding[Variant.Localization.Value]]]
   val cDNAChange: Option[Coding[HGVS.DNA]]
   val gDNAChange: Option[Coding[HGVS.DNA]]
   val proteinChange: Option[Coding[HGVS.Protein]]
@@ -265,6 +266,34 @@ sealed abstract class Variant
 object Variant
 {
 
+  sealed trait Localization
+  object Localization
+  extends CodedEnum("dnpm-dip/rd/variant/localization")
+  with DefaultCodeSystem
+  {
+    val CodingRegion     = Value("coding-region")
+    val SplicingRegion   = Value("splicing-region")
+    val RegulatoryRegion = Value("regulatory-region")
+    val Intronic         = Value("intronic")
+    val Intergenic       = Value("intergenic")
+
+    override val display =
+      Map(
+        CodingRegion     -> "Coding region",
+        SplicingRegion   -> "splicing region",
+        RegulatoryRegion -> "Regulatory region",
+        Intronic         -> "Intronic",
+        Intergenic       -> "Intergenic"
+      )
+    
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
+      
+  }
+  
   sealed trait Zygosity
   object Zygosity
   extends CodedEnum("dnpm-dip/rd/variant/zygosity")
@@ -287,6 +316,7 @@ object Variant
         homoplasmic   -> "Homoplasmic",
         heteroplasmic -> "Heteroplasmic"
       )
+
     final class ProviderSPI extends CodeSystemProviderSPI
     {
       override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
@@ -403,6 +433,7 @@ final case class SmallVariant
   patient: Reference[Patient],
   chromosome: Coding[Chromosome.Value],
   genes: Option[Set[Coding[HGNC]]],
+  localization: Option[Set[Coding[Variant.Localization.Value]]],
   position: Int,
   ref: String,
   alt: String,
@@ -432,6 +463,7 @@ final case class StructuralVariant
   id: Id[Variant],
   patient: Reference[Patient],
   genes: Option[Set[Coding[HGNC]]],
+  localization: Option[Set[Coding[Variant.Localization.Value]]],
   iscnDescription: Option[Coding[ISCN]],
   cDNAChange: Option[Coding[HGVS.DNA]],
   gDNAChange: Option[Coding[HGVS.DNA]],
@@ -460,6 +492,7 @@ final case class CopyNumberVariant
   patient: Reference[Patient],
   chromosome: Coding[Chromosome.Value],
   genes: Option[Set[Coding[HGNC]]],
+  localization: Option[Set[Coding[Variant.Localization.Value]]],
   startPosition: Int,
   endPosition: Int,
   `type`: Coding[CopyNumberVariant.Type.Value],

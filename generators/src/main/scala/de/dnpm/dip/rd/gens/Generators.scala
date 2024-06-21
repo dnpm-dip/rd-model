@@ -2,7 +2,10 @@ package de.dnpm.dip.rd.gens
 
 
 import java.net.URI
-import java.time.LocalDate
+import java.time.{
+  LocalDate,
+  YearMonth
+}
 import cats.data.NonEmptyList
 import play.api.libs.json.JsObject
 import de.ekut.tbi.generators.{
@@ -13,21 +16,26 @@ import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
 }
+import de.dnpm.dip.coding.atc.ATC
+import de.dnpm.dip.coding.atc.Kinds.Substance
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.{
   Id,
   Age,
-  Episode,
+  Duration,
   ExternalId,
   Reference,
   Gender,
+  History,
   NGSReport,
   Patient,
   Period,
   Publication,
   PubMed,
-  TransferTAN
+  Study,
+  TransferTAN,
+  UnitOfTime
 }
 import de.dnpm.dip.rd.model._
 
@@ -67,7 +75,6 @@ trait Generators
   implicit def genCoproductCoding[H: Coding.System, T <: Coproduct, L <: Nat](
     implicit
     genH: Gen[Coding[H]],
-//    genT: Gen[Coding[T]],
     len: coproduct.Length.Aux[T, L],
     lenAsInt: ToInt[L]
   ): Gen[Coding[H :+: T]] =
@@ -110,6 +117,19 @@ trait Generators
       "ORPHA:984"
     )
     .map(Coding[Orphanet](_))
+
+
+  private val atcRegex =
+    """B06AC|C09X|C10A""".r.unanchored
+
+  private implicit lazy val atc: CodeSystem[ATC] =
+    ATC.Catalogs
+      .getInstance[cats.Id]
+      .get
+      .latest
+      .filter(c => atcRegex matches c.code.value)
+      .filter(ATC.filterByKind(Substance))
+
 
 
   implicit def genDiagnosisCatagoryCoding: Gen[Coding[RDDiagnosis.Category]] =
@@ -155,68 +175,74 @@ trait Generators
       )
 
 
-  implicit val genDiagnosis: Gen[RDDiagnosis] =
+  def genDiagnosis(
+    patient: Patient,
+  ): Gen[RDDiagnosis] =
     for {
       id       <- Gen.of[Id[RDDiagnosis]]
-      patient  <- Gen.of[Id[Patient]]
       date     <- Gen.const(LocalDate.now).map(Some(_))
       category <- Gen.of[Coding[RDDiagnosis.Category]]
       onsetAge <- Gen.intsBetween(12,42).map(Age(_))
-      status   <- Gen.of[Coding[RDDiagnosis.Status.Value]]
+      status   <- Gen.of[Coding[RDDiagnosis.VerificationStatus.Value]]
     } yield
       RDDiagnosis(
         id,
-        Reference.from(patient),
+        Reference.to(patient),
         date,
         NonEmptyList.one(category),
         Some(onsetAge),
-        false,
         status
       )
 
 
-  def genCase(
+  def genEpisode(
     patient: Patient,
-    diagnoses: List[RDDiagnosis]
-  ): Gen[RDCase] =
+  ): Gen[RDEpisodeOfCare] =
     for {
-      id    <- Gen.of[Id[RDCase]]
+      id    <- Gen.of[Id[RDEpisodeOfCare]]
       ttan  <- Gen.of[Id[TransferTAN]]
-      extId <- Gen.of[ExternalId[RDCase]]
-      gmId <- genExternalId[RDCase,GestaltMatcher]
     } yield
-      RDCase(
+      RDEpisodeOfCare(
         id,
-        Some(extId),
         Reference.to(patient),
         Some(ttan),
-        Some(gmId),
-        diagnoses.map(Reference.to(_)),
-        Some(Coding(RDCase.StatusReason.NoSequencingRequested))
+        Period(LocalDate.now)
       )
 
-  implicit val genHPOTerm: Gen[HPOTerm] =
+  def genHPOTerm(
+    patient: Patient
+  ): Gen[HPOTerm] =
     for {
-      id    <- Gen.of[Id[HPOTerm]]
-      pat   <- Gen.of[Id[Patient]]
-      value <- Gen.of[Coding[HPO]]
+      id     <- Gen.of[Id[HPOTerm]]
+      value  <- Gen.of[Coding[HPO]]
+      status <- Gen.of[Coding[HPOTerm.Status.Value]]
     } yield
       HPOTerm(
         id,
-        Reference.from(pat),
-        value
+        Reference.to(patient),
+        YearMonth.now.minusMonths(5),
+        value,
+        Some(
+          List(
+            HPOTerm.Status(
+              status,
+              LocalDate.now
+            )
+          )
+        )
       )
 
 
-  implicit val genAutozygosity: Gen[Autozygosity] =
+  def genAutozygosity(
+    patient: Patient
+  ): Gen[Autozygosity] =
     for {
       id    <- Gen.of[Id[Autozygosity]]
-      pat   <- Gen.of[Id[Patient]]
       value <- Gen.floats
     } yield
       Autozygosity(
         id,
-        Reference.from(pat),
+        Reference.to(patient),
         value
       )
 
@@ -283,12 +309,14 @@ trait Generators
     Seq("A","C","G","T")
 
 
-  implicit val genSmallVariant: Gen[SmallVariant] =
+  def genSmallVariant(
+    patient: Patient
+  ): Gen[SmallVariant] =
     for {
       id    <- Gen.of[Id[SmallVariant]]
-      pat   <- Gen.of[Id[Patient]]
       chr   <- Gen.of[Coding[Chromosome.Value]]
       gene  <- Gen.of[Coding[HGNC]]
+      localization <- Gen.of[Coding[Variant.Localization.Value]]
       pos   <- Gen.positiveInts
       ref   <- Gen.oneOf(bases)
       alt   <- Gen.oneOf((bases.toSet - ref).toSeq)
@@ -309,9 +337,10 @@ trait Generators
     } yield 
       SmallVariant(
         id,
-        Reference.from(pat),
+        Reference.to(patient),
         chr,
         Some(Set(gene)),
+        Some(Set(localization)),
         pos,
         ref,
         alt,
@@ -328,11 +357,13 @@ trait Generators
         Some(Set(pmid))
       )
 
-  implicit val genStructuralVariant: Gen[StructuralVariant] =
+  def genStructuralVariant(
+    patient: Patient
+  ): Gen[StructuralVariant] =
     for {
       id    <- Gen.of[Id[SmallVariant]]
-      pat   <- Gen.of[Id[Patient]]
       gene  <- Gen.of[Coding[HGNC]]
+      localization <- Gen.of[Coding[Variant.Localization.Value]]
       iscn  <- Gen.const(Coding[ISCN]("Some ISCN description"))
       dnaChg <- Gen.oneOf(gDNAChanges)
       proteinChg <- Gen.oneOf(proteinChanges)
@@ -351,8 +382,9 @@ trait Generators
     } yield 
       StructuralVariant(
         id,
-        Reference.from(pat),
+        Reference.to(patient),
         Some(Set(gene)),
+        Some(Set(localization)),
         Some(iscn),
         Some(dnaChg),
         Some(dnaChg),
@@ -367,12 +399,14 @@ trait Generators
         Some(Set(pmid))
       )
 
-  implicit val genCopyNumberVariant: Gen[CopyNumberVariant] =
+  def genCopyNumberVariant(
+    patient: Patient
+  ): Gen[CopyNumberVariant] =
     for {
       id    <- Gen.of[Id[SmallVariant]]
-      pat   <- Gen.of[Id[Patient]]
       chr   <- Gen.of[Coding[Chromosome.Value]]
       gene  <- Gen.of[Coding[HGNC]]
+      localization <- Gen.of[Coding[Variant.Localization.Value]]
       start <- Gen.positiveInts
       end   <- Gen.positiveInts
       typ   <- Gen.of[Coding[CopyNumberVariant.Type.Value]]
@@ -393,9 +427,10 @@ trait Generators
     } yield 
       CopyNumberVariant(
         id,
-        Reference.from(pat),
+        Reference.to(patient),
         chr,
         Some(Set(gene)),
+        Some(Set(localization)),
         start,
         end,
         typ,
@@ -414,10 +449,11 @@ trait Generators
 
 
 
-  implicit val genNGSReport: Gen[RDNGSReport] =
+  def genNGSReport(
+    patient: Patient
+  ): Gen[RDNGSReport] =
     for {
       id  <- Gen.of[Id[RDNGSReport]]
-      pat <- Gen.of[Id[Patient]]
       lab <- Gen.of[Id[Lab]].map(Reference.from(_).copy(display = Some("Lab name")))
       typ <- Gen.of[Coding[NGSReport.SequencingType.Value]]
       familyControl <- Gen.of[Coding[RDNGSReport.FamilyControlLevel.Value]]
@@ -429,14 +465,14 @@ trait Generators
           platform,
           "Kit..."
         )
-      autoZyg <- Gen.of[Autozygosity]
-      smallVariants <- Gen.list(Gen.intsBetween(3,5),Gen.of[SmallVariant])
-      cnvs <- Gen.list(Gen.intsBetween(3,5),Gen.of[CopyNumberVariant])
-      svs <- Gen.list(Gen.intsBetween(3,5),Gen.of[StructuralVariant])
+      autoZyg <- genAutozygosity(patient)
+      smallVariants <- Gen.list(Gen.intsBetween(3,5),genSmallVariant(patient))
+      cnvs <- Gen.list(Gen.intsBetween(3,5),genCopyNumberVariant(patient))
+      svs <- Gen.list(Gen.intsBetween(3,5),genStructuralVariant(patient))
     } yield
       RDNGSReport(
         id,
-        Reference.from(pat),
+        Reference.to(patient),
         lab,
         Some(LocalDate.now),
         typ,
@@ -449,18 +485,127 @@ trait Generators
       )
 
 
-  implicit val genRDTherapy: Gen[RDTherapy] =
+  def genTherapyRecommendation(
+    patient: Patient,
+    variants: Seq[Reference[Variant]]
+  ): Gen[RDTherapyRecommendation] =
+    for {
+      id <- Gen.of[Id[RDTherapyRecommendation]]
+
+      medication <- Gen.of[Coding[ATC]]
+
+      supportingVariant <- Gen.oneOf(variants)
+
+    } yield RDTherapyRecommendation(
+      id,
+      Reference.to(patient),
+      LocalDate.now,
+      Some(Set(medication)),
+      Some(List(supportingVariant))
+    )
+
+
+  def genCarePlan(
+    patient: Patient,
+    variants: Seq[Reference[Variant]]
+  ): Gen[RDCarePlan] =
+    for {
+      id <- Gen.of[Id[RDCarePlan]]
+
+      protocol = "Protocol of the RD conference..."
+
+      recommendation <-
+        genTherapyRecommendation(
+          patient,
+          variants
+        )
+
+      studyEnrollmentRecommendation <-
+        for {
+          stId <- Gen.of[Id[RDStudyEnrollmentRecommendation]]
+          studyNr <- Gen.intsBetween(10000000,50000000)
+                     .map(s => ExternalId[Study](s"$s","???"))
+        } yield RDStudyEnrollmentRecommendation(
+          stId,
+          Reference.to(patient),
+          LocalDate.now,
+          recommendation.supportingVariants,
+          Some(List(studyNr))
+        )
+
+      clinicalManagementRecommendation <-
+        for {
+          recId <- Gen.of[Id[ClinicalManagementRecommendation]]
+          typ <- Gen.of[Coding[ClinicalManagementRecommendation.Type.Value]]
+        } yield ClinicalManagementRecommendation(
+          recId,
+          Reference.to(patient),
+          LocalDate.now,
+          typ
+        )
+
+    } yield RDCarePlan(
+      id,
+      Reference.to(patient),
+      LocalDate.now,
+      Some(true),
+      Some(List(recommendation)),
+      Some(studyEnrollmentRecommendation),
+      Some(clinicalManagementRecommendation),
+      Some(protocol)
+    )
+
+
+  def genTherapy(
+    patient: Patient,
+    recommendation: RDTherapyRecommendation
+  ): Gen[History[RDTherapy]] =
     for { 
       id <- Gen.of[Id[RDTherapy]]
-      pat <- Gen.of[Id[Patient]]
       notes <- Gen.const("Notes on the therapy...")
-    } yield
+    } yield History(
       RDTherapy(
         id,
-        Reference.from(pat),
-        notes
+        Reference.to(patient),
+        Some(Reference.to(recommendation)),
+        LocalDate.now,
+        recommendation.medication,
+        Some(Period(recommendation.issuedOn)),
+        Some(notes)
       )
+    )
 
+
+  def genGMFCS(
+    patient: Patient
+  ): Gen[GMFCSStatus] =
+    for { 
+      id <- Gen.of[Id[GMFCSStatus]]
+      value <- Gen.of[Coding[GMFCS.Value]]
+    } yield GMFCSStatus(
+      id,
+      Reference.to(patient),
+      LocalDate.now,
+      value
+    )
+
+  def genHospitalization(
+    patient: Patient
+  ): Gen[Hospitalization] =
+    for { 
+      id <- Gen.of[Id[Hospitalization]]
+      days <- Gen.intsBetween(5,42)
+    } yield Hospitalization(
+      id,
+      Reference.to(patient),
+      Some(
+        Period(
+          LocalDate.now.minusYears(5),
+          LocalDate.now
+        )
+      ),
+      Duration(days,UnitOfTime.Days)
+    )
 
   implicit val genRDPatientRecord: Gen[RDPatientRecord] =
     for {
@@ -469,46 +614,50 @@ trait Generators
 
       patRef = Reference.to(patient)
 
-      diag <-
-        Gen.of[RDDiagnosis]
-          .map(_.copy(patient = patRef))
+      diag <- genDiagnosis(patient)
 
-      cse <-
-        genCase(patient,List(diag))
+      episode <- genEpisode(patient)
 
       hpoTerms <-
         Gen.list(
           Gen.intsBetween(3,5),
-          Gen.of[HPOTerm].map(_.copy(patient = patRef))
+          genHPOTerm(patient)
         )
         .map(_.distinctBy(_.value.code))
 
+      hospitalization <-
+        genHospitalization(patient) 
+
+      gmfcsStatus <-
+        genGMFCS(patient)
+
       ngsReport <-
-        Gen.of[RDNGSReport]
-          .map(
-            ngs =>
-              ngs.copy(
-                patient = patRef,
-                autozygosity = ngs.autozygosity.map(_.copy(patient = patRef)),
-                smallVariants = ngs.smallVariants.map(_.map(_.copy(patient = patRef))),
-                copyNumberVariants = ngs.copyNumberVariants.map(_.map(_.copy(patient = patRef))),
-                structuralVariants = ngs.structuralVariants.map(_.map(_.copy(patient = patRef)))
-              )
-          )
+        genNGSReport(patient)
+
+      carePlan <-
+        genCarePlan(
+          patient,
+          ngsReport.variants.map(Reference.to(_))
+        ) 
 
       therapy <-
-        Gen.of[RDTherapy]
-          .map(_.copy(patient = patRef))
+        genTherapy(
+          patient,
+          carePlan.therapyRecommendations.get.head
+        )
 
     } yield
       RDPatientRecord(
         patient,
         JsObject.empty,
-        NonEmptyList.one(cse),
+        NonEmptyList.one(episode),
         diag,
+        Some(List(gmfcsStatus)),
+        Some(hospitalization),
         NonEmptyList.fromListUnsafe(hpoTerms),
         Some(List(ngsReport)),
-        Some(therapy)
+        Some(List(carePlan)),
+        Some(List(therapy))
       )
 
 }

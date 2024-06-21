@@ -44,8 +44,7 @@ final case class RDDiagnosis
   recordedOn: Option[LocalDate],
   categories: NonEmptyList[Coding[RDDiagnosis.Category]],
   onsetAge: Option[Age],
-  prenatal: Boolean,
-  status: Coding[RDDiagnosis.Status.Value]
+  verificationStatus: Coding[RDDiagnosis.VerificationStatus.Value]
 )
 extends Diagnosis
 
@@ -141,8 +140,8 @@ object RDDiagnosis
   }
 
 
-  object Status
-  extends CodedEnum("dnpm-dip/rd/diagnosis/status")
+  object VerificationStatus
+  extends CodedEnum("dnpm-dip/rd/diagnosis/verification-status")
   with DefaultCodeSystem
   {
 
@@ -151,15 +150,13 @@ object RDDiagnosis
     val Unclear         = Value("unclear")
     val Unsolved        = Value("unsolved")
 
-    implicit val format: Format[Status.Value] = 
-      Json.formatEnum(this)
-
-    override val display = {
-      case Solved          => "Gelöst"
-      case PartiallySolved => "Teilweise gelöst"
-      case Unclear         => "Unklar"
-      case Unsolved        => "Ungelöst"
-    }
+    override val display =
+      Map(
+        Solved          -> "Genetische Diagnose gesichert",
+        PartiallySolved -> "Klinischer Phänotyp nur partiell gelöst",
+        Unclear         -> "Genetische Verdachtsdiagnose",
+        Unsolved        -> "Keine genetische Diagnosestellung"
+      )
 
     final class ProviderSPI extends CodeSystemProviderSPI
     {
