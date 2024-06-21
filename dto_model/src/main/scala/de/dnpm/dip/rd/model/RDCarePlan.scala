@@ -31,7 +31,7 @@ final case class RDTherapyRecommendation
   id: Id[RDTherapyRecommendation],
   patient: Reference[Patient],
   issuedOn: LocalDate,
-//  `type`: Coding[RDTherapy.Type.Value],
+  category: Coding[RDTherapy.Category.Value],
   medication: Option[Set[Coding[ATC]]],
   supportingVariants: Option[List[Reference[Variant]]]
 )

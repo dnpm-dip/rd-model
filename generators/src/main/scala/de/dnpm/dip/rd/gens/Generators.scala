@@ -491,15 +491,14 @@ trait Generators
   ): Gen[RDTherapyRecommendation] =
     for {
       id <- Gen.of[Id[RDTherapyRecommendation]]
-
+      category <- Gen.of[Coding[RDTherapy.Category.Value]]
       medication <- Gen.of[Coding[ATC]]
-
       supportingVariant <- Gen.oneOf(variants)
-
     } yield RDTherapyRecommendation(
       id,
       Reference.to(patient),
       LocalDate.now,
+      category,
       Some(Set(medication)),
       Some(List(supportingVariant))
     )
@@ -569,6 +568,7 @@ trait Generators
         Reference.to(patient),
         Some(Reference.to(recommendation)),
         LocalDate.now,
+        recommendation.category,
         recommendation.medication,
         Some(Period(recommendation.issuedOn)),
         Some(notes)
