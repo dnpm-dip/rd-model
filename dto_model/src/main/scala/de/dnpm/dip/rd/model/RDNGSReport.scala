@@ -31,7 +31,7 @@ final case class RDNGSReport
   id: Id[RDNGSReport],
   patient: Reference[Patient],
   performingLab: Reference[Lab],
-  recordedOn: Option[LocalDate],
+  issuedOn: LocalDate,
   sequencingType: Coding[NGSReport.SequencingType.Value],
   familyControls: Coding[RDNGSReport.FamilyControlLevel.Value],
   sequencingInfo: RDNGSReport.SequencingInfo,
@@ -40,6 +40,7 @@ final case class RDNGSReport
   copyNumberVariants: Option[List[CopyNumberVariant]],
   structuralVariants: Option[List[StructuralVariant]],
 )
+extends NGSReport
 {
   def variants: List[Variant] =
     smallVariants.getOrElse(List.empty) ++

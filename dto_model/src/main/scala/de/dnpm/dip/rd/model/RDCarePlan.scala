@@ -38,8 +38,7 @@ final case class RDTherapyRecommendation
 extends TherapyRecommendation
 {
   val indication = None
-
-  val priority = Coding(TherapyRecommendation.Priority.Four)
+  val priority = None
 }
 
 object RDTherapyRecommendation

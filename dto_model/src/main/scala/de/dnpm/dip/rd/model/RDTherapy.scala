@@ -10,6 +10,8 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.model.{
   Id,
+  Therapy,
+  MedicationTherapy,
   Patient,
   Period,
   Reference
@@ -26,11 +28,18 @@ final case class RDTherapy
   patient: Reference[Patient],
   basedOn: Option[Reference[RDTherapyRecommendation]],
   recordedOn: LocalDate,
-  category: Coding[RDTherapy.Category.Value],
+  category: Option[Coding[RDTherapy.Category.Value]],
   medication: Option[Set[Coding[ATC]]],
   period: Option[Period[LocalDate]],
   notes: Option[String]
 )
+extends MedicationTherapy[ATC]
+{
+  val indication = None
+  val status = Coding(Therapy.Status.Unknown)
+  val statusReason = None
+  val therapyLine = None
+}
 
 object RDTherapy
 {

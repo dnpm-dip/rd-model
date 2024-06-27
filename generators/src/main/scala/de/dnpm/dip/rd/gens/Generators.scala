@@ -171,6 +171,7 @@ trait Generators
         birthdate,
         None,
         None,
+        None,
         None
       )
 
@@ -474,7 +475,7 @@ trait Generators
         id,
         Reference.to(patient),
         lab,
-        Some(LocalDate.now),
+        LocalDate.now,
         typ,
         familyControl,
         metaInfo,
@@ -568,7 +569,7 @@ trait Generators
         Reference.to(patient),
         Some(Reference.to(recommendation)),
         LocalDate.now,
-        recommendation.category,
+        Some(recommendation.category),
         recommendation.medication,
         Some(Period(recommendation.issuedOn)),
         Some(notes)
