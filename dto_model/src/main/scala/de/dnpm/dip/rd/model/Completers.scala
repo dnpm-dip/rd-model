@@ -8,9 +8,10 @@ import cats.{
 import cats.data.NonEmptyList
 import de.dnpm.dip.util.Completer
 import de.dnpm.dip.model.{
+  BaseCompleters,
   Patient,
   Observation,
-  Site
+//  Site
 }
 import de.dnpm.dip.coding.{
   Code,
@@ -34,14 +35,16 @@ import de.dnpm.dip.rd.model.{
   CopyNumberVariant,
   StructuralVariant
 }
+/*
 import shapeless.{
   Coproduct,
   :+:,
   CNil
 }
+*/
 
 
-trait Completers
+trait Completers extends BaseCompleters
 {
 
   import Completer.syntax._
@@ -57,45 +60,6 @@ trait Completers
   protected implicit val omim: CodeSystem[OMIM]
 
   protected implicit val icd10gm: CodeSystemProvider[ICD10GM,Id,Applicative[Id]]
-
-
-  implicit val patientCompleter: Completer[Patient] =
-    Completer.of(
-      pat =>
-        pat.copy(
-          gender       = pat.gender.complete,
-          managingSite = Some(Site.local)
-        )
-    )
-
-
-  implicit def coproductCodingCompleter[
-    H: Coding.System,
-    T <: Coproduct
-  ](
-    implicit
-    compH: Completer[Coding[H]],
-    compT: Completer[Coding[T]]
-  ): Completer[Coding[H :+: T]] =
-    Completer.of { 
-      coding =>
-        (
-          if (coding.system == Coding.System[H].uri)
-            compH(coding.asInstanceOf[Coding[H]])
-          else
-            compT(coding.asInstanceOf[Coding[T]])
-        )
-        .asInstanceOf[Coding[H :+: T]]
-    }
-
-  implicit def terminalCoproductCodingCompleter[
-    H: Coding.System
-  ](
-    implicit
-    compH: Completer[Coding[H]],
-  ): Completer[Coding[H :+: CNil]] =
-    compH.asInstanceOf[Completer[Coding[H :+: CNil]]]
-
 
 
   implicit val diagnosisCompleter: Completer[RDDiagnosis] =
