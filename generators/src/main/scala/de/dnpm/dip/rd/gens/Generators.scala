@@ -34,7 +34,6 @@ import de.dnpm.dip.model.{
   Publication,
   PubMed,
   Study,
-  TransferTAN,
   UnitOfTime
 }
 import de.dnpm.dip.rd.model._
@@ -67,33 +66,6 @@ trait Generators
     Gen.oneOf(CodeSystem[S].concepts)
       .map(Coding.fromConcept(_))
 
-/*
-  import shapeless.{Coproduct, :+:, CNil, Inl, Inr, Nat}
-  import shapeless.ops.coproduct
-  import shapeless.ops.nat.ToInt
-
-  implicit def genCoproductCoding[H: Coding.System, T <: Coproduct, L <: Nat](
-    implicit
-    genH: Gen[Coding[H]],
-    len: coproduct.Length.Aux[T, L],
-    lenAsInt: ToInt[L]
-  ): Gen[Coding[H :+: T]] =
-    for {
-      p <- Gen.doubles
-
-      coding <-
-        if (p < 1.0/(1 + lenAsInt())) genH
-        else genT
-
-      coding <- genH  
-    } yield coding.asInstanceOf[Coding[H :+: T]]
-
-
-  implicit def genCoproductTermination[H: Coding.System](
-    implicit genH: Gen[Coding[H]]
-  ): Gen[Coding[H :+: CNil]] =
-    genH.map(_.asInstanceOf[Coding[H :+: CNil]])
-*/
 
   implicit val genHpoCoding: Gen[Coding[HPO]] =
     Gen.oneOf(
@@ -201,12 +173,10 @@ trait Generators
   ): Gen[RDEpisodeOfCare] =
     for {
       id    <- Gen.of[Id[RDEpisodeOfCare]]
-      ttan  <- Gen.of[Id[TransferTAN]]
     } yield
       RDEpisodeOfCare(
         id,
         Reference.to(patient),
-        Some(ttan),
         Period(LocalDate.now)
       )
 

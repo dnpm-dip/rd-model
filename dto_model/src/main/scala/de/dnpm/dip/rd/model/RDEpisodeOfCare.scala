@@ -14,8 +14,7 @@ import de.dnpm.dip.model.{
   ExternalId,
   Patient,
   Period,
-  Reference,
-  TransferTAN
+  Reference
 }
 import play.api.libs.json.{
   Json,
@@ -27,8 +26,7 @@ final case class RDEpisodeOfCare
 (
   id: Id[RDEpisodeOfCare],
   patient: Reference[Patient],
-  transferTan: Option[Id[TransferTAN]],
-  period: Period[LocalDate],
+  period: Period[LocalDate]
 )
 extends EpisodeOfCare
 {
