@@ -18,7 +18,6 @@ import play.api.libs.json.{
 final case class RDPatientRecord
 (
   patient: Patient,
-  consent: JsObject,
   episodesOfCare: NonEmptyList[RDEpisodeOfCare],
   diagnosis: RDDiagnosis,
   gmfcsStatus: Option[List[GMFCSStatus]],

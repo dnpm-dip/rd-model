@@ -10,17 +10,11 @@ import json.{
   Json,
   Schema
 }
-import com.github.andyglow.json.Value
-import com.github.andyglow.jsonschema.AsPlay._
-import com.github.andyglow.jsonschema.CatsSupport._
-import Schema.`object`.Field
-import json.schema.Version._
 import de.dnpm.dip.coding.{
   Code,
   Coding,
   CodeSystem
 }
-import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.model.{
   Age,
   ExternalId,
@@ -42,11 +36,6 @@ trait Schemas extends BaseSchemas
   implicit val patientSchema: Schema[Patient] =
     Json.schema[Patient]
       .toDefinition("Patient")
-
-
-  implicit val consentSchema: Schema[JsObject] = 
-    Schema.`object`.Free[JsObject]()
-      .toDefinition("Consent")
 
 
   implicit val diagnosisCategoryCoding: Schema[Coding[RDDiagnosis.Category]] =

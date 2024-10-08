@@ -23,11 +23,10 @@ class Tests extends AnyFlatSpec
 
   "JSON Schema derivation for RDPatientRecord" must "have worked" in {
 
-//    Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
-//    Schema[RDPatientRecord].asPlay(Draft07("RD-Patient-Record"))
-    Schema[RDPatientRecord].asPlay(Draft04())
+    Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
       .pipe(prettyPrint(_))
       .tap(println(_))
+/*      
       .tap { js =>
         val writer =
           new FileWriter(new File("/home/lucien/rd_patient_record_schema.json"))
@@ -35,6 +34,7 @@ class Tests extends AnyFlatSpec
         writer.write(js)
         writer.close
       }
+*/
 
     succeed
   }

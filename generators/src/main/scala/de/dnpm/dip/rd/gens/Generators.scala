@@ -620,7 +620,6 @@ trait Generators
     } yield
       RDPatientRecord(
         patient,
-        JsObject.empty,
         NonEmptyList.one(episode),
         diag,
         Some(List(gmfcsStatus)),

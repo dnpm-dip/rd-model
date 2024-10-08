@@ -11,7 +11,6 @@ import de.dnpm.dip.model.{
   BaseCompleters,
   Patient,
   Observation,
-//  Site
 }
 import de.dnpm.dip.coding.{
   Code,
@@ -35,13 +34,6 @@ import de.dnpm.dip.rd.model.{
   CopyNumberVariant,
   StructuralVariant
 }
-/*
-import shapeless.{
-  Coproduct,
-  :+:,
-  CNil
-}
-*/
 
 
 trait Completers extends BaseCompleters
