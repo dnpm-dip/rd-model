@@ -39,7 +39,7 @@ trait Schemas extends BaseSchemas
 
 
   implicit val diagnosisCategoryCoding: Schema[Coding[RDDiagnosis.Category]] =
-    coproductCodingSchema[RDDiagnosis.Category]
+    coproductCodingSchema[RDDiagnosis.Category]("DiseaseCategory")
 
 
   implicit val diagnosisSchema: Schema[RDDiagnosis] =

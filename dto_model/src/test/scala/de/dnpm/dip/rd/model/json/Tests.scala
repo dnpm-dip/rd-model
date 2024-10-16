@@ -23,9 +23,10 @@ class Tests extends AnyFlatSpec
 
   "JSON Schema derivation for RDPatientRecord" must "have worked" in {
 
-    Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
-      .pipe(prettyPrint(_))
-      .tap(println(_))
+    val schema =
+      Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
+        .pipe(prettyPrint(_))
+        .tap(println(_))
 /*      
       .tap { js =>
         val writer =
@@ -36,7 +37,7 @@ class Tests extends AnyFlatSpec
       }
 */
 
-    succeed
+     schema must not contain ("Coding[")
   }
 
 }
