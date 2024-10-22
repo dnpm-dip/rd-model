@@ -38,6 +38,7 @@ class Tests extends AnyFlatSpec
 */
 
      schema must not contain ("Coding[")
+     schema must contain noneOf ("head","tail")
   }
 
 }

@@ -10,6 +10,7 @@ import json.{
   Json,
   Schema
 }
+import com.github.andyglow.jsonschema.CatsSupport._ // For correct handling of NonEmptyList in Schema derivation
 import de.dnpm.dip.coding.{
   Code,
   Coding,
@@ -39,7 +40,7 @@ trait Schemas extends BaseSchemas
 
 
   implicit val diagnosisCategoryCoding: Schema[Coding[RDDiagnosis.Category]] =
-    coproductCodingSchema[RDDiagnosis.Category]("DiseaseCategory")
+    coproductCodingSchema[RDDiagnosis.Category]
 
 
   implicit val diagnosisSchema: Schema[RDDiagnosis] =

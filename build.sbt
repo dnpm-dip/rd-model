@@ -23,6 +23,7 @@ lazy val global = project
   .aggregate(
      dto_model,
      hpo,
+     alpha_id_se,
      omim,
      orphanet,
      generators,
@@ -56,6 +57,16 @@ lazy val orphanet = project
     settings,
     libraryDependencies ++= Seq(
       dependencies.scala_xml,
+      dependencies.scalatest
+    )
+  )
+  .dependsOn(dto_model)
+
+lazy val alpha_id_se = project
+  .settings(
+    name := "alpha-id-se",
+    settings,
+    libraryDependencies ++= Seq(
       dependencies.scalatest
     )
   )
