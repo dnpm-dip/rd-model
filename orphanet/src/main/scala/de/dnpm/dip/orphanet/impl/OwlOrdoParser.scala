@@ -4,8 +4,6 @@ package de.dnpm.dip.orphanet.impl
 import java.io.InputStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
-import scala.util.Try
-import scala.util.matching.Regex
 import scala.xml.XML
 import de.dnpm.dip.coding.{
   Code,
@@ -20,8 +18,6 @@ object OwlOrdoParser
 {
 
   import scala.util.chaining._
-  import Orphanet.extensions._
-
 
   // Extractor of Orpha-ID from ORDO concept URL:
   private object OrphaURL

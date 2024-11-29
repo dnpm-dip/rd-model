@@ -7,12 +7,10 @@ import cats.Applicative
 import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem,
   CodeSystemProvider,
   CodeSystemProviderSPI,
-  SingleCodeSystemProvider,
   ValueSet,
   ValueSetProvider,
   ValueSetProviderSPI,
@@ -28,7 +26,6 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
-  Format,
   OFormat
 }
 import shapeless.{
@@ -43,6 +40,7 @@ final case class RDDiagnosis
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
   categories: NonEmptyList[Coding[RDDiagnosis.Category]],
+//  codes: NonEmptyList[Coding[RDDiagnosis.Category]],
   onsetAge: Option[Age],
   verificationStatus: Coding[RDDiagnosis.VerificationStatus.Value]
 )

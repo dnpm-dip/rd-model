@@ -4,7 +4,6 @@ package de.dnpm.dip.rd.model
 import java.time.LocalDate
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem
 }
@@ -13,7 +12,6 @@ import de.dnpm.dip.model.{
   CarePlan,
   Id,
   ExternalId,
-  Period,
   Reference,
   Patient,
   TherapyRecommendation,

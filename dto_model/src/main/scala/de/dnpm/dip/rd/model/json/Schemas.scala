@@ -1,32 +1,13 @@
 package de.dnpm.dip.rd.model.json
 
 
-import java.time.LocalDate
-import java.time.temporal.Temporal
-import scala.util.chaining._
-import cats.data.NonEmptyList
-import play.api.libs.json.JsObject
 import json.{
   Json,
   Schema
 }
 import com.github.andyglow.jsonschema.CatsSupport._ // For correct handling of NonEmptyList in Schema derivation
-import de.dnpm.dip.coding.{
-  Code,
-  Coding,
-  CodeSystem
-}
-import de.dnpm.dip.model.{
-  Age,
-  ExternalId,
-  Id,
-  Patient,
-  Period,
-  Publication,
-  PubMed,
-  OpenEndPeriod,
-  Reference,
-}
+import de.dnpm.dip.coding.Coding
+import de.dnpm.dip.model.Patient
 import de.dnpm.dip.model.json.BaseSchemas
 import de.dnpm.dip.rd.model._
 

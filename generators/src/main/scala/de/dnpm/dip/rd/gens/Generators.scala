@@ -1,13 +1,11 @@
 package de.dnpm.dip.rd.gens
 
 
-import java.net.URI
 import java.time.{
   LocalDate,
   YearMonth
 }
 import cats.data.NonEmptyList
-import play.api.libs.json.JsObject
 import de.ekut.tbi.generators.{
   Gen,
 }
@@ -155,7 +153,7 @@ trait Generators
       id       <- Gen.of[Id[RDDiagnosis]]
       date     <- Gen.const(LocalDate.now).map(Some(_))
       category <- Gen.of[Coding[RDDiagnosis.Category]]
-      onsetAge <- Gen.intsBetween(12,42).map(Age(_))
+      onsetAge <- Gen.intsBetween(12,42).map(i => Age(i.toDouble))
       status   <- Gen.of[Coding[RDDiagnosis.VerificationStatus.Value]]
     } yield
       RDDiagnosis(
@@ -232,18 +230,6 @@ trait Generators
           Coding[HGNC](code,display)
       }
     )
-
-  // Source: https://varnomen.hgvs.org/recommendations/DNA/variant/substitution/
-  private val cDNAChanges =
-    Seq(
-      "NG_012232.1(NM_004006.2):c.93+1G>T",
-      "LRG_199t1:c.79_80delinsTT",
-      "NM_004006.2:c.145_147delinsTGG",
-      "G_199t1:c.54G>H",
-      "LRG_199t1:c.85=/T>C",
-      "NM_004006.2:c.123=",
-    )
-    .map(Coding[HGVS.DNA](_))
 
   // Source: https://varnomen.hgvs.org/recommendations/DNA/variant/duplication/
   private val gDNAChanges =
@@ -575,7 +561,7 @@ trait Generators
           LocalDate.now
         )
       ),
-      Duration(days,UnitOfTime.Days)
+      Duration(days.toDouble,UnitOfTime.Days)
     )
 
   implicit val genRDPatientRecord: Gen[RDPatientRecord] =

@@ -3,6 +3,7 @@ package de.dnpm.dip.rd.model.tests
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers._
+import org.scalatest.Inspectors._
 import de.dnpm.dip.coding.{
   Coding,
   ValueSetProvider
@@ -12,6 +13,11 @@ import de.dnpm.dip.rd.model.RDDiagnosis
 
 class CodeSystemTests extends AnyFlatSpec
 {
+
+  import play.api.libs.json._
+  import Json._
+  import scala.util.chaining._
+
 
   "Loading ValueSet dynamically via ValueSetProvider" must "have worked" in {
 
@@ -24,6 +30,19 @@ class CodeSystemTests extends AnyFlatSpec
         Coding.System[RDDiagnosis.Category].uri
       )
 
+  }
+
+  "Serialized Codings of ValueSet 'RDDiagnosis.Category'" must "all have 'system' attribute" in {
+
+    RDDiagnosis.Category
+      .valueSet
+      .codings
+      .pipe(toJson(_))
+      .pipe(_.as[JsArray].value)
+      .pipe(
+        forAll(_){ js => (js \ "system").asOpt[String] must be (defined) }
+      )
+   
   }
 
 }

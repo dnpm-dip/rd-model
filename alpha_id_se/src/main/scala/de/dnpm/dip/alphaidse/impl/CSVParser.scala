@@ -2,10 +2,6 @@ package de.dnpm.dip.alphaidse.impl
 
 
 import java.io.InputStream
-import java.time.{
-  LocalDate,
-  LocalTime
-}
 import scala.io.Source
 import de.dnpm.dip.coding.{
   Code,

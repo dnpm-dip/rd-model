@@ -13,7 +13,6 @@ import de.dnpm.dip.coding.{
   CodeSystem,
   CodeSystemProvider,
   CodeSystemProviderSPI,
-  Version
 }
 import de.dnpm.dip.rd.model.Orphanet
 

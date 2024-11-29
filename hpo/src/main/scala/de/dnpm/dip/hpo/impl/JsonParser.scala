@@ -7,7 +7,6 @@ import java.time.{
   LocalTime
 }
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-import scala.util.matching.Regex
 import play.api.libs.json.{
   Json,
   JsObject,
@@ -23,9 +22,6 @@ import de.dnpm.dip.rd.model.HPO
 
 object JsonParser
 {
-
-  import scala.util.chaining._
-
 
   private val Date =
     raw"(\d{4}-\d{2}-\d{2})".r.unanchored

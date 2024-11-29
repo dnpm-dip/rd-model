@@ -8,8 +8,6 @@ import java.time.{
 }
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import scala.io.Source
-import scala.util.chaining._
-import scala.util.matching.Regex
 import de.dnpm.dip.coding.{
   Code,
   Coding,

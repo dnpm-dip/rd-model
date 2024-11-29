@@ -2,16 +2,9 @@ package de.dnpm.dip.rd.model
 
 
 import java.time.LocalDate
-import cats.Applicative
-import de.dnpm.dip.coding.{
-  CodedEnum,
-  Coding,
-  DefaultCodeSystem
-}
 import de.dnpm.dip.model.{
   Id,
   EpisodeOfCare,
-  ExternalId,
   Patient,
   Period,
   Reference

@@ -4,7 +4,6 @@ package de.dnpm.dip.rd.model
 import cats.Applicative
 import de.dnpm.dip.coding.{
   Coding,
-  Code,
   CodeSystem,
   CodeSystemProvider,
 }

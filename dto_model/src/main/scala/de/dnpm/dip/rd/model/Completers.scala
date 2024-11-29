@@ -5,21 +5,13 @@ import cats.{
   Applicative,
   Id
 }
-import cats.data.NonEmptyList
 import de.dnpm.dip.util.Completer
-import de.dnpm.dip.model.{
-  BaseCompleters,
-  Patient,
-  Observation,
-}
+import de.dnpm.dip.model.BaseCompleters
 import de.dnpm.dip.coding.{
-  Code,
-  Coding,
   CodeSystem,
   CodeSystemProvider
 }
 import de.dnpm.dip.coding.hgnc.HGNC
-import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.rd.model.{
   ACMG,
@@ -40,7 +32,6 @@ trait Completers extends BaseCompleters
 {
 
   import Completer.syntax._
-  import scala.util.chaining._ 
 
 
   protected implicit val hpOntology: CodeSystem[HPO]

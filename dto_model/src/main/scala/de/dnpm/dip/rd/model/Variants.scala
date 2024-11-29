@@ -6,11 +6,9 @@ import cats.Applicative
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  CodeSystem,
   DefaultCodeSystem,
   CodeSystemProvider,
   CodeSystemProviderSPI,
-  SingleCodeSystemProvider
 }
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
@@ -21,7 +19,6 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   Publication,
-  Observation
 }
 import play.api.libs.json.{
   Json,
