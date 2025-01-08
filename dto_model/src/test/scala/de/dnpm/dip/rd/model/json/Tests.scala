@@ -1,17 +1,13 @@
 package de.dnpm.dip.rd.model.json
 
 
-import java.io.{File,FileWriter}
 import scala.util.chaining._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers._
 import json.Schema
 import json.schema.Version._
 import com.github.andyglow.jsonschema.AsPlay._
-import play.api.libs.json.Json.{
-  prettyPrint,
-  toJson
-}
+import play.api.libs.json.Json
 import de.dnpm.dip.rd.model._
 
 
@@ -25,17 +21,8 @@ class Tests extends AnyFlatSpec
 
     val schema =
       Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
-        .pipe(prettyPrint(_))
-        .tap(println(_))
-/*      
-      .tap { js =>
-        val writer =
-          new FileWriter(new File("/home/lucien/rd_patient_record_schema.json"))
-
-        writer.write(js)
-        writer.close
-      }
-*/
+        .pipe(Json.prettyPrint(_))
+//        .tap(println(_))
 
      schema must not contain ("Coding[")
      schema must contain noneOf ("head","tail")

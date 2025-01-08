@@ -3,11 +3,9 @@ package de.dnpm.dip.omim.impl
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers._
-import org.scalatest.Inspectors._
 import cats.Id
 import de.dnpm.dip.rd.model.OMIM
 import de.dnpm.dip.coding.{
-  Code,
   Coding,
   CodeSystemProvider
 }
