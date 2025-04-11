@@ -19,13 +19,13 @@ class CodeSystemTests extends AnyFlatSpec
       .map(_.uri)
       .toList must contain allOf (
         Coding.System[RDDiagnosis.VerificationStatus.Value].uri,
-        Coding.System[RDNGSReport.FamilyControlLevel.Value].uri,
+        Coding.System[RDDiagnosis.FamilyControlLevel.Value].uri,
         Coding.System[ACMG.Class.Value].uri,
         Coding.System[ACMG.Criterion.Type.Value].uri,
         Coding.System[ACMG.Criterion.Modifier.Value].uri,
         Coding.System[Variant.Zygosity.Value].uri,
         Coding.System[Variant.SegregationAnalysis.Value].uri,
-        Coding.System[Variant.InheritanceMode.Value].uri,
+        Coding.System[Variant.ModeOfInheritance.Value].uri,
         Coding.System[Variant.Significance.Value].uri,
       )
 

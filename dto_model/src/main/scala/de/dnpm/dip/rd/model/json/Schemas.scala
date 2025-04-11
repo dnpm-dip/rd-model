@@ -7,7 +7,6 @@ import json.{
 }
 import com.github.andyglow.jsonschema.CatsSupport._ // For correct handling of NonEmptyList in Schema derivation
 import de.dnpm.dip.coding.Coding
-import de.dnpm.dip.model.Patient
 import de.dnpm.dip.model.json.BaseSchemas
 import de.dnpm.dip.rd.model._
 
@@ -15,13 +14,8 @@ import de.dnpm.dip.rd.model._
 trait Schemas extends BaseSchemas
 {
 
-  implicit val patientSchema: Schema[Patient] =
-    Json.schema[Patient]
-      .toDefinition("Patient")
-
-
-  implicit val diagnosisCategoryCoding: Schema[Coding[RDDiagnosis.Category]] =
-    coproductCodingSchema[RDDiagnosis.Category]
+  implicit val diagnosisSystemsCoding: Schema[Coding[RDDiagnosis.Systems]] =
+    coproductCodingSchema[RDDiagnosis.Systems]
 
 
   implicit val diagnosisSchema: Schema[RDDiagnosis] =

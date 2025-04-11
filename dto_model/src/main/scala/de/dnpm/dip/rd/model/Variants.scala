@@ -4,6 +4,7 @@ package de.dnpm.dip.rd.model
 
 import cats.Applicative
 import de.dnpm.dip.coding.{
+  Code,
   Coding,
   CodedEnum,
   DefaultCodeSystem,
@@ -14,6 +15,8 @@ import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.util.Displays
 import de.dnpm.dip.model.{
+  BaseVariant,
+  Chromosome,
   Id,
   ExternalId,
   Reference,
@@ -27,6 +30,7 @@ import play.api.libs.json.{
 }
 
 
+/*
 object Chromosome
 extends CodedEnum("chromosome")
 with DefaultCodeSystem
@@ -64,12 +68,20 @@ with DefaultCodeSystem
   implicit val format: Format[Chromosome.Value] =
     Json.formatEnum(this)
 }
+*/
+
+object Chromosome extends Enumeration with Chromosome
+{
+  val chrMT = Value
+
+  implicit val format: Format[Value] =
+    Json.formatEnum(this)
+}
 
 
 object ACMG
 {
 
-  sealed trait Class
   object Class
   extends CodedEnum("https://www.acmg.net/class")
   with DefaultCodeSystem
@@ -107,7 +119,6 @@ object ACMG
   object Criterion
   {
 
-    sealed trait Type
     object Type
     extends CodedEnum("https://www.acmg.net/criteria/type")
     with DefaultCodeSystem
@@ -184,30 +195,29 @@ BP7 -> """A synonymous (silent) variant for which splicing prediction algorithms
         
     }
 
-    sealed trait Modifier
     object Modifier
     extends CodedEnum("https://www.acmg.net/criteria/modifier")
     with DefaultCodeSystem
     {
-      val pvs,
-          ps, 
-          pm, 
-          pp, 
-          ba, 
-          bs, 
-          bp, 
-          bm = Value
+      val PVS = Value("pvs")
+      val PS  = Value("ps")
+      val PM  = Value("pm")
+      val PP  = Value("pp")
+      val BA  = Value("ba")
+      val BS  = Value("bs")
+      val BP  = Value("bp")
+      val BM  = Value("bm")
 
       override val display =
         Map(
-          pvs -> "very strong pathogenic",
-          ps  -> "strong pathogenic",
-          pm  -> "medium pathogenic",
-          pp  -> "supporting pathogenic",
-          ba  -> "stand-alone benign",
-          bs  -> "strong benign",
-          bp  -> "supporting benign",
-          bm  -> "medium benign"
+          PVS -> "very strong pathogenic",
+          PS  -> "strong pathogenic",
+          PM  -> "medium pathogenic",
+          PP  -> "supporting pathogenic",
+          BA  -> "stand-alone benign",
+          BS  -> "strong benign",
+          BP  -> "supporting benign",
+          BM  -> "medium benign"
         )
     
       final class ProviderSPI extends CodeSystemProviderSPI
@@ -230,88 +240,58 @@ sealed trait ClinVar
 object ClinVar
 {
   implicit val codingSystem: Coding.System[ClinVar] =
-    Coding.System[ClinVar]("https://www.ncbi.nlm.nih.gov/clinvar/")
+    Coding.System[ClinVar]("https://www.ncbi.nlm.nih.gov/clinvar")
 }
 
 sealed trait ISCN
 object ISCN
 {
   implicit val codingSystem: Coding.System[ISCN] =
-    Coding.System[ISCN]("https://iscn.karger.com/")
+    Coding.System[ISCN]("https://iscn.karger.com")
 }
 
 
-sealed abstract class Variant
+sealed abstract class Variant extends BaseVariant
 {
   val id: Id[Variant]
   val patient: Reference[Patient]
   val genes: Option[Set[Coding[HGNC]]]
-  val localization: Option[Set[Coding[Variant.Localization.Value]]]
-  val cDNAChange: Option[Coding[HGVS.DNA]]
-  val gDNAChange: Option[Coding[HGVS.DNA]]
-  val proteinChange: Option[Coding[HGVS.Protein]]
+  val localization: Option[Set[Coding[BaseVariant.Localization.Value]]]
+  val cDNAChange: Option[Code[HGVS.DNA]]
+  val gDNAChange: Option[Code[HGVS.DNA]]
+  val proteinChange: Option[Code[HGVS.Protein]]
   val acmgClass: Coding[ACMG.Class.Value]
   val acmgCriteria: Option[Set[ACMG.Criterion]]
   val zygosity: Coding[Variant.Zygosity.Value]
   val segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]]
-  val modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]]
+  val modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]]
   val significance: Option[Coding[Variant.Significance.Value]]
-  val clinVarID: Option[ExternalId[Variant]]
+  val externalIds: Option[List[ExternalId[Variant,ClinVar]]]
   val publications: Option[Set[Reference[Publication]]]
 }
 
 object Variant
 {
 
-  sealed trait Localization
-  object Localization
-  extends CodedEnum("dnpm-dip/rd/variant/localization")
-  with DefaultCodeSystem
-  {
-    val CodingRegion     = Value("coding-region")
-    val SplicingRegion   = Value("splicing-region")
-    val RegulatoryRegion = Value("regulatory-region")
-    val Intronic         = Value("intronic")
-    val Intergenic       = Value("intergenic")
-
-    override val display =
-      Map(
-        CodingRegion     -> "Coding region",
-        SplicingRegion   -> "splicing region",
-        RegulatoryRegion -> "Regulatory region",
-        Intronic         -> "Intronic",
-        Intergenic       -> "Intergenic"
-      )
-    
-    final class ProviderSPI extends CodeSystemProviderSPI
-    {
-      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
-        new Provider.Facade[F]
-    }
-      
-  }
-  
-  sealed trait Zygosity
   object Zygosity
   extends CodedEnum("dnpm-dip/rd/variant/zygosity")
   with DefaultCodeSystem
   {
-    val heterozygous,
-        homozygous,
-        hemi,  
-        homoplasmic,
-        heteroplasmic = Value
-
-    val compHet = Value("comp-het")
+    val Heterozygous  = Value("heterozygous")
+    val Homozygous    = Value("homozygous")
+    val CompHet       = Value("comp-het")
+    val Hemi          = Value("hemi")
+    val Homoplasmic   = Value("homoplasmic")
+    val Heteroplasmic = Value("heteroplasmic")
 
     override val display =
       Map(
-        heterozygous  -> "Heterozygous",
-        homozygous    -> "Homozygous",
-        compHet       -> "Compound heterozygous",
-        hemi          -> "Hemizygous",
-        homoplasmic   -> "Homoplasmic",
-        heteroplasmic -> "Heteroplasmic"
+        Heterozygous  -> "Heterozygous",
+        Homozygous    -> "Homozygous",
+        CompHet       -> "Compound heterozygous",
+        Hemi          -> "Hemizygous",
+        Homoplasmic   -> "Homoplasmic",
+        Heteroplasmic -> "Heteroplasmic"
       )
 
     final class ProviderSPI extends CodeSystemProviderSPI
@@ -323,22 +303,21 @@ object Variant
   }
 
 
-  sealed trait SegregationAnalysis
   object SegregationAnalysis
   extends CodedEnum("dnpm-dip/rd/variant/segregation-analysis")
   with DefaultCodeSystem
   {
-    val notPerformed = Value("not-performed")
-    val deNovo       = Value("de-novo")
-    val fromFather   = Value("from-father")
-    val fromMother   = Value("from-mother")
+    val NotPerformed = Value("not-performed")
+    val DeNovo       = Value("de-novo")
+    val FromFather   = Value("from-father")
+    val FromMother   = Value("from-mother")
 
     override val display =
       Map(
-        notPerformed -> "not performed",
-        deNovo       -> "de-novo",
-        fromFather   -> "Transmitted from father",
-        fromMother   -> "Transmitted from mother"
+        NotPerformed -> "not performed",
+        DeNovo       -> "de-novo",
+        FromFather   -> "Transmitted from father",
+        FromMother   -> "Transmitted from mother"
       )
     
     final class ProviderSPI extends CodeSystemProviderSPI
@@ -350,27 +329,24 @@ object Variant
   }
   
 
-  sealed trait InheritanceMode
-  object InheritanceMode
+  object ModeOfInheritance
   extends CodedEnum("dnpm-dip/rd/variant/mode-of-inheritance")
   with DefaultCodeSystem
   {
-    val dominant,
-        recessive,
-        mitochondrial,
-        unclear = Value
-
-    val Xlinked = Value("X-linked")
+    val Dominant      = Value("dominant")
+    val Recessive     = Value("recessive")
+    val Mitochondrial = Value("mitochondrial")
+    val Xlinked       = Value("X-linked")
+    val Unclear       = Value("unclear")
 
     override val display =
       Map(
-        dominant      -> "Dominant",
-        recessive     -> "Recessive",
+        Dominant      -> "Dominant",
+        Recessive     -> "Recessive",
         Xlinked       -> "X-linked",
-        mitochondrial -> "Mitochondrial",
-        unclear       -> "Unclear"
+        Mitochondrial -> "Mitochondrial",
+        Unclear       -> "Unclear"
       )
-
 
     final class ProviderSPI extends CodeSystemProviderSPI
     {
@@ -407,17 +383,16 @@ object Variant
   }
 
 
-
   implicit val displays: Displays[Variant] =
     Displays[Variant]{
       case sv: SmallVariant =>
-        s"SmallVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.display).getOrElse("")}"
+        s"SmallVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.value).getOrElse("")}"
 
       case sv: StructuralVariant =>
-        s"StructuralVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.display).getOrElse("")}"
+        s"StructuralVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.value).getOrElse("")}"
 
       case cnv: CopyNumberVariant =>
-        s"CNV ${cnv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")} ${cnv.proteinChange.orElse(cnv.gDNAChange).orElse(cnv.cDNAChange).map(_.display).getOrElse("")}"
+        s"CNV ${cnv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")} ${cnv.proteinChange.orElse(cnv.gDNAChange).orElse(cnv.cDNAChange).map(_.value).getOrElse("")}"
     }
 
 } // End object Variant
@@ -428,22 +403,23 @@ final case class SmallVariant
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  chromosome: Coding[Chromosome.Value],
+  chromosome: Chromosome.Value,
   genes: Option[Set[Coding[HGNC]]],
-  localization: Option[Set[Coding[Variant.Localization.Value]]],
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   position: Int,
   ref: String,
   alt: String,
-  cDNAChange: Option[Coding[HGVS.DNA]],
-  gDNAChange: Option[Coding[HGVS.DNA]],
-  proteinChange: Option[Coding[HGVS.Protein]],
+  cDNAChange: Option[Code[HGVS.DNA]],
+  gDNAChange: Option[Code[HGVS.DNA]],
+  proteinChange: Option[Code[HGVS.Protein]],
   acmgClass: Coding[ACMG.Class.Value],
   acmgCriteria: Option[Set[ACMG.Criterion]],
   zygosity: Coding[Variant.Zygosity.Value],
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
-  modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]],
+  modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
-  clinVarID: Option[ExternalId[Variant]],
+//  clinVarID: Option[ExternalId[Variant,ClinVar]],
+  externalIds: Option[List[ExternalId[Variant,ClinVar]]],
   publications: Option[Set[Reference[Publication]]]
 )
 extends Variant
@@ -460,18 +436,19 @@ final case class StructuralVariant
   id: Id[Variant],
   patient: Reference[Patient],
   genes: Option[Set[Coding[HGNC]]],
-  localization: Option[Set[Coding[Variant.Localization.Value]]],
-  iscnDescription: Option[Coding[ISCN]],
-  cDNAChange: Option[Coding[HGVS.DNA]],
-  gDNAChange: Option[Coding[HGVS.DNA]],
-  proteinChange: Option[Coding[HGVS.Protein]],
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
+  iscnDescription: Option[Code[ISCN]],
+  cDNAChange: Option[Code[HGVS.DNA]],
+  gDNAChange: Option[Code[HGVS.DNA]],
+  proteinChange: Option[Code[HGVS.Protein]],
   acmgClass: Coding[ACMG.Class.Value],
   acmgCriteria: Option[Set[ACMG.Criterion]],
   zygosity: Coding[Variant.Zygosity.Value],
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
-  modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]],
+  modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
-  clinVarID: Option[ExternalId[Variant]],
+//  clinVarID: Option[ExternalId[Variant,ClinVar]],
+  externalIds: Option[List[ExternalId[Variant,ClinVar]]],
   publications: Option[Set[Reference[Publication]]]
 )
 extends Variant
@@ -487,39 +464,41 @@ final case class CopyNumberVariant
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  chromosome: Coding[Chromosome.Value],
+  chromosome: Chromosome.Value,
   genes: Option[Set[Coding[HGNC]]],
-  localization: Option[Set[Coding[Variant.Localization.Value]]],
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   startPosition: Int,
   endPosition: Int,
   `type`: Coding[CopyNumberVariant.Type.Value],
-  cDNAChange: Option[Coding[HGVS.DNA]],
-  gDNAChange: Option[Coding[HGVS.DNA]],
-  proteinChange: Option[Coding[HGVS.Protein]],
+  cDNAChange: Option[Code[HGVS.DNA]],
+  gDNAChange: Option[Code[HGVS.DNA]],
+  proteinChange: Option[Code[HGVS.Protein]],
   acmgClass: Coding[ACMG.Class.Value],
   acmgCriteria: Option[Set[ACMG.Criterion]],
   zygosity: Coding[Variant.Zygosity.Value],
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
-  modeOfInheritance: Option[Coding[Variant.InheritanceMode.Value]],
+  modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
-  clinVarID: Option[ExternalId[Variant]],
+//  clinVarID: Option[ExternalId[Variant,ClinVar]],
+  externalIds: Option[List[ExternalId[Variant,ClinVar]]],
   publications: Option[Set[Reference[Publication]]]
 )
 extends Variant
 
 object CopyNumberVariant
 { 
-  sealed trait Type
+
   object Type
   extends CodedEnum("dnpm-dip/rd/cnv/type")
   with DefaultCodeSystem
   {
-    val gain, loss = Value
+    val Gain = Value("gain")
+    val Loss = Value("loss")
 
     override val display =
       Map(
-        gain -> "Gain",
-        loss -> "Loss"
+        Gain -> "Gain",
+        Loss -> "Loss"
       )
 
     final class ProviderSPI extends CodeSystemProviderSPI

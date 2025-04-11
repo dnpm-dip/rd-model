@@ -11,6 +11,7 @@ import de.dnpm.dip.coding.{
   DefaultCodeSystem,
 }
 import de.dnpm.dip.model.{
+  History,
   Id,
   Reference,
   Patient,
@@ -27,9 +28,10 @@ final case class HPOTerm
 (
   id: Id[HPOTerm],
   patient: Reference[Patient],
-  onsetDate: YearMonth,
+  recordedOn: Option[LocalDate],
+  onsetDate: Option[YearMonth],
   value: Coding[HPO],
-  statusHistory: Option[List[HPOTerm.Status]]
+  status: Option[History[HPOTerm.Status]],
 )
 extends Observation[Coding[HPO]]
 
@@ -41,15 +43,17 @@ object HPOTerm
   with DefaultCodeSystem
   {
 
-    val Improved = Value("improved")
-    val Worsened = Value("worsened")
-    val Resolved = Value("resolved")
+    val Unchanged = Value("unchanged")
+    val Improved  = Value("improved")
+    val Degraded  = Value("degraded")
+    val Abated    = Value("abated")
 
     override val display =
       Map(
-        Improved -> "Verbessert",
-        Worsened -> "Verschlechtert",
-        Resolved -> "Weggefallen"
+        Unchanged -> "Unverändert",
+        Improved  -> "Verbessert",
+        Degraded  -> "Verschlechtert",
+        Abated    -> "Weggefallen"
       )
 
   }

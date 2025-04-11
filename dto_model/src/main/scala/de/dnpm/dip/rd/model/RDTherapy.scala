@@ -11,7 +11,7 @@ import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.model.{
   Id,
   Therapy,
-  MedicationTherapy,
+  SystemicTherapy,
   Patient,
   Period,
   Reference
@@ -29,17 +29,19 @@ final case class RDTherapy
   basedOn: Option[Reference[RDTherapyRecommendation]],
   recordedOn: LocalDate,
   category: Option[Coding[RDTherapy.Category.Value]],
+  `type`: Option[Coding[RDTherapy.Type.Value]],
   medication: Option[Set[Coding[ATC]]],
   period: Option[Period[LocalDate]],
-  notes: Option[String]
+  notes: Option[List[String]]
 )
-extends MedicationTherapy[ATC]
+extends SystemicTherapy[ATC]
 {
-  val indication = None
-  val status = Coding(Therapy.Status.Unknown)
-  val statusReason = None
-  val therapyLine = None
+  override val reason = None
+  override val status = Coding(Therapy.Status.Unknown)
+  override val statusReason = None
+  override val therapyLine = None
 }
+
 
 object RDTherapy
 {
@@ -49,19 +51,43 @@ object RDTherapy
   with DefaultCodeSystem
   {
 
-    val SymptomaticTherapy      = Value("symptomatic-therapy")
-    val SymptomaticMedication   = Value("symptomatic-medication-administration")
-    val SymptomaticIntervention = Value("symptomatic-intervention")
-    val CausalMedication        = Value("causal-medication-administration")
-    val CausalIntervention      = Value("causal-intervention")
+    val Symptomatic = Value("symptomatic")
+    val Causal      = Value("causal")
 
     override val display =
       Map(
-        SymptomaticTherapy      -> "Symptomatische nicht-medikamentöse Therapie (Fördermaßnahmen)",
-        SymptomaticMedication   -> "Symptomatische medikamentöse Therapie (bspw. antispastische Medikation)",
-        SymptomaticIntervention -> "Symptomatische interventionelle Therapie (Operationen, Injektionen)",
-        CausalMedication        -> "Kausale Therapie (medikamentös)",
-        CausalIntervention      -> "Kausale Therapie (interventionell)"
+        Symptomatic -> "Symptomatisch",
+        Causal      -> "Kausal"
+      )
+  }
+
+
+  object Type
+  extends CodedEnum("dnpm-dip/rd/therapy/type")
+  with DefaultCodeSystem
+  {
+
+    val SystemicMedication   = Value("systemic-medication")
+    val TargetedMedication   = Value("targeted-medication")
+    val PreventionMedication = Value("prevention-medication")
+    val Genetic              = Value("genetic")
+    val Prophylactic         = Value("prophylactic")
+    val EarlyDetection       = Value("early-detection")
+    val Combination          = Value("combination")
+    val Nutrition            = Value("nutrition")
+    val Other                = Value("other")
+
+    override val display =
+      Map(
+        SystemicMedication   -> "Medikamentös systemisch",
+        TargetedMedication   -> "Medikamentös zielgerichtet",
+        PreventionMedication -> "Medikamentös Prävention",
+        Genetic              -> "Gentherapie",
+        Prophylactic         -> "Prophylaxe",
+        EarlyDetection       -> "Früherkennung",
+        Combination          -> "Kombinationstherapie",
+        Nutrition            -> "Ernährung",
+        Other                -> "Andere"
       )
   }
 

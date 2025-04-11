@@ -2,6 +2,7 @@ package de.dnpm.dip.rd.model
 
 
 import java.time.LocalDate
+import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
@@ -11,9 +12,11 @@ import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.model.{
   CarePlan,
   Id,
-  ExternalId,
   Reference,
+  ExternalReference,
+  GeneAlterationReference,
   Patient,
+  Recommendation,
   TherapyRecommendation,
   Study,
   StudyEnrollmentRecommendation
@@ -30,13 +33,14 @@ final case class RDTherapyRecommendation
   patient: Reference[Patient],
   issuedOn: LocalDate,
   category: Coding[RDTherapy.Category.Value],
+  `type`: Coding[RDTherapy.Type.Value],
   medication: Option[Set[Coding[ATC]]],
-  supportingVariants: Option[List[Reference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )
 extends TherapyRecommendation
 {
-  val indication = None
-  val priority = None
+  val reason = None
+  val priority = Coding(Recommendation.Priority.One) // Irrelevant, so just set a constant
 }
 
 object RDTherapyRecommendation
@@ -51,13 +55,19 @@ final case class RDStudyEnrollmentRecommendation
   id: Id[RDStudyEnrollmentRecommendation],
   patient: Reference[Patient],
   issuedOn: LocalDate,
-  supportingVariants: Option[List[Reference[Variant]]],
-  studies: Option[List[ExternalId[Study]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
+  study: NonEmptyList[ExternalReference[Study,Study.Registries]]
 )
 extends StudyEnrollmentRecommendation
 
 object RDStudyEnrollmentRecommendation
 {
+
+  import de.dnpm.dip.util.json.{
+    readsNel,
+    writesNel
+  }
+
   implicit val format: OFormat[RDStudyEnrollmentRecommendation] =
     Json.format[RDStudyEnrollmentRecommendation]
 }
@@ -110,21 +120,56 @@ final case class RDCarePlan
   id: Id[RDCarePlan],
   patient: Reference[Patient],
   issuedOn: LocalDate,
-  sequencingRequested: Option[Boolean],
+  statusReason: Option[Coding[RDCarePlan.StatusReason.Value]],
+  geneticCounselingRecommended: Option[Boolean],
+  reevaluationRecommended: Option[Boolean],
   therapyRecommendations: Option[List[RDTherapyRecommendation]],
-  studyEnrollmentRecommendation: Option[RDStudyEnrollmentRecommendation],
+  studyEnrollmentRecommendations: Option[List[RDStudyEnrollmentRecommendation]],
   clinicalManagementRecommendation: Option[ClinicalManagementRecommendation],
-  notes: Option[String]
+  notes: Option[List[String]]
 )
 extends CarePlan
 {
-  val indication = None
-  val medicationRecommendations = None
+  type StatusReason = RDCarePlan.StatusReason.type
+
+  override val reason = None
+  override val medicationRecommendations = None
 }
 
 
 object RDCarePlan
 {
+/*
+  object StatusReason
+  extends CodedEnum("dnpm-dip/rd/careplan/status-reason")
+  with DefaultCodeSystem
+  {
+    val TargetedDiagnosticsRecommended = Value("targeted-diagnostics-recommended")
+    val PsychosomaticDisease           = Value("psychosomatic-disease")
+    val NotRareDisease                 = Value("not-rare-disease")
+    val NonGeneticCause                = Value("non-genetic-cause")
+    val Other                          = Value("other")
+
+    override val display =
+      Map(
+        TargetedDiagnosticsRecommended -> "Zieldiagnostik empfohlen",
+        PsychosomaticDisease           -> "Wahrscheinlich psychosomatische Erkrankung",
+        NotRareDisease                 -> "Wahrscheinlich häufige Erkrankung",
+        NonGeneticCause                -> "Wahrscheinlich nicht genetische Ursache",
+        Other                          -> "Anderer Grund" 
+      )
+  }
+*/
+
+  object StatusReason
+  extends CodedEnum("dnpm-dip/rd/careplan/status-reason")
+  with CarePlan.NonInclusionReason
+  with DefaultCodeSystem
+  {
+    override val display = defaultDisplay
+  }
+
+
   implicit val format: OFormat[RDCarePlan] =
     Json.format[RDCarePlan]
 }

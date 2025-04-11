@@ -2,14 +2,7 @@ package de.dnpm.dip.rd.model
 
 
 import java.time.LocalDate
-import cats.Applicative
-import de.dnpm.dip.coding.{
-  Coding,
-  CodedEnum,
-  DefaultCodeSystem,
-  CodeSystemProvider,
-  CodeSystemProviderSPI,
-}
+import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.model.{
   Id,
   NGSReport,
@@ -22,56 +15,27 @@ import play.api.libs.json.{
 }
 
 
-sealed trait Lab
-
 final case class RDNGSReport
 (
   id: Id[RDNGSReport],
   patient: Reference[Patient],
-  performingLab: Reference[Lab],
   issuedOn: LocalDate,
-  sequencingType: Coding[NGSReport.SequencingType.Value],
-  familyControls: Coding[RDNGSReport.FamilyControlLevel.Value],
+  `type`: Coding[NGSReport.Type.Value],
   sequencingInfo: RDNGSReport.SequencingInfo,
-  autozygosity: Option[Autozygosity],
-  smallVariants: Option[List[SmallVariant]],
-  copyNumberVariants: Option[List[CopyNumberVariant]],
-  structuralVariants: Option[List[StructuralVariant]],
+  results: Option[RDNGSReport.Results]
 )
 extends NGSReport
 {
+  override val notes = None
+
   def variants: List[Variant] =
-    smallVariants.getOrElse(List.empty) ++
-    copyNumberVariants.getOrElse(List.empty) ++
-    structuralVariants.getOrElse(List.empty)
+    results.flatMap(_.smallVariants).getOrElse(List.empty) ++
+    results.flatMap(_.copyNumberVariants).getOrElse(List.empty) ++
+    results.flatMap(_.structuralVariants).getOrElse(List.empty)
 }
 
 object RDNGSReport
 {
-
-  sealed trait FamilyControlLevel
-  object FamilyControlLevel
-  extends CodedEnum("dnpm-dip/rd/ngs-report/family-control-level")
-  with DefaultCodeSystem
-  {
-    val single, duo, trio = Value
-    val Gt3 = Value(">3")
-
-    override val display =
-      Map(
-        single -> "single",
-        duo    -> "duo",
-        trio   -> "trio",  
-        Gt3    -> ">3"
-      )
-
-    final class ProviderSPI extends CodeSystemProviderSPI
-    {
-      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
-        new Provider.Facade[F]
-    }
-
-  }
 
   final case class SequencingInfo
   (
@@ -79,10 +43,20 @@ object RDNGSReport
     kit: String
   )
 
+  final case class Results
+  (
+    autozygosity: Option[Autozygosity],
+    smallVariants: Option[List[SmallVariant]],
+    copyNumberVariants: Option[List[CopyNumberVariant]],
+    structuralVariants: Option[List[StructuralVariant]],
+  )
 
   implicit val formatSequencingInfo: OFormat[SequencingInfo] =
     Json.format[SequencingInfo]
 
+  implicit val formatResults: OFormat[Results] =
+    Json.format[Results]
+  
   implicit val format: OFormat[RDNGSReport] =
     Json.format[RDNGSReport]
   

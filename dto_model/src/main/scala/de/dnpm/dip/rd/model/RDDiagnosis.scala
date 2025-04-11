@@ -2,7 +2,10 @@ package de.dnpm.dip.rd.model
 
 
 import java.net.URI
-import java.time.LocalDate
+import java.time.{
+  YearMonth,
+  LocalDate
+}
 import cats.Applicative
 import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
@@ -22,7 +25,6 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   Diagnosis,
-  Age
 }
 import play.api.libs.json.{
   Json,
@@ -38,26 +40,27 @@ final case class RDDiagnosis
 (
   id: Id[RDDiagnosis],
   patient: Reference[Patient],
-  recordedOn: Option[LocalDate],
-  categories: NonEmptyList[Coding[RDDiagnosis.Category]],
-//  codes: NonEmptyList[Coding[RDDiagnosis.Category]],
-  onsetAge: Option[Age],
-  verificationStatus: Coding[RDDiagnosis.VerificationStatus.Value]
+  recordedOn: LocalDate,
+  onsetDate: YearMonth,
+  familyControlLevel: Coding[RDDiagnosis.FamilyControlLevel.Value],
+  verificationStatus: Coding[RDDiagnosis.VerificationStatus.Value],
+  codes: NonEmptyList[Coding[RDDiagnosis.Systems]],
+  missingCodeReason: Option[Coding[RDDiagnosis.MissingCodeReason.Value]],
+  notes: Option[List[String]]
 )
 extends Diagnosis
 
 object RDDiagnosis
 {
 
-  type Category =
-    Orphanet :+: ICD10GM :+: OMIM :+: CNil
+  type Systems = Orphanet :+: ICD10GM :+: AlphaIDSE :+: CNil
 
 
-  object Category
+  object Systems
   {
 
-    implicit val system: Coding.System[Category] =
-      Coding.System[Category]("dnpm-dip/rd/disease-category")
+    implicit val system: Coding.System[Systems] =
+      Coding.System[Systems]("dnpm-dip/rd/diagnosis/code-systems")
 
     private val version: String = "-" 
 
@@ -67,8 +70,8 @@ object RDDiagnosis
         .get
         .latest
 
-    private lazy val omim =
-      OMIM.Catalog
+    private lazy val alphaId =
+      AlphaIDSE.Catalogs
         .getInstance[cats.Id]
         .get
         .latest
@@ -79,17 +82,17 @@ object RDDiagnosis
         .get
         .latest
 
-    lazy val valueSet: ValueSet[Category] =
+    lazy val valueSet: ValueSet[Systems] =
       ValueSet(
-        uri = Coding.System[Category].uri,
-        name = "rare-disease-category",
-        title = Some("Rare Disease Category"),
+        uri = Coding.System[Systems].uri,
+        name = "rare-disease-code-systems",
+        title = Some("Rare Disease CodeSystems"),
         date = None,
         version = None,
         codings =
-          ordo.concepts.map(_.toCodingOf[Category]) ++
-          icd10gm.concepts.map(_.toCodingOf[Category]) ++
-          omim.concepts.map(_.toCodingOf[Category])
+          ordo.concepts.map(_.toCodingOf[Systems]) ++
+          icd10gm.concepts.map(_.toCodingOf[Systems]) ++
+          alphaId.concepts.map(_.toCodingOf[Systems])
       )
 
     class ProviderSPI extends ValueSetProviderSPI
@@ -99,14 +102,14 @@ object RDDiagnosis
     }
 
 
-    private class Provider[F[_]] extends ValueSetProvider[Category,F,Applicative[F]]
+    private class Provider[F[_]] extends ValueSetProvider[Systems,F,Applicative[F]]
     {
 
       import cats.syntax.applicative._
       import cats.syntax.functor._
 
       val uri: URI =
-        Coding.System[Category].uri
+        Coding.System[Systems].uri
     
       val versionOrdering: Ordering[String] =
         Version.Unordered
@@ -125,12 +128,12 @@ object RDDiagnosis
         version: String
       )(
         implicit env: Applicative[F]
-      ): F[Option[ValueSet[Category]]] =
+      ): F[Option[ValueSet[Systems]]] =
         latest.map(Some(_))
     
       def latest(
         implicit env: Applicative[F]
-      ): F[ValueSet[Category]] =
+      ): F[ValueSet[Systems]] =
         valueSet.pure
 
     }
@@ -138,22 +141,19 @@ object RDDiagnosis
   }
 
 
-  object VerificationStatus
-  extends CodedEnum("dnpm-dip/rd/diagnosis/verification-status")
+  object FamilyControlLevel
+  extends CodedEnum("dnpm-dip/rd/diagnosis/family-control-level")
   with DefaultCodeSystem
   {
-
-    val Solved          = Value("solved")
-    val PartiallySolved = Value("partially-solved")
-    val Unclear         = Value("unclear")
-    val Unsolved        = Value("unsolved")
+    val Single = Value("single-genome")
+    val Duo    = Value("duo-genome")
+    val Trio   = Value("trio-genome")
 
     override val display =
       Map(
-        Solved          -> "Genetische Diagnose gesichert",
-        PartiallySolved -> "Klinischer Phänotyp nur partiell gelöst",
-        Unclear         -> "Genetische Verdachtsdiagnose",
-        Unsolved        -> "Keine genetische Diagnosestellung"
+        Single -> "Einzelgenom",
+        Duo    -> "Duogenom",
+        Trio   -> "Triogenom",  
       )
 
     final class ProviderSPI extends CodeSystemProviderSPI
@@ -161,6 +161,46 @@ object RDDiagnosis
       override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
         new Provider.Facade[F]
     }
+
+  }
+
+  object VerificationStatus
+  extends CodedEnum("dnpm-dip/rd/diagnosis/verification-status")
+  with DefaultCodeSystem
+  {
+
+    val Unconfirmed = Value("unconfirmed")
+    val Provisional = Value("provisional")
+    val Partial     = Value("partial")
+    val Confirmed   = Value("confirmed")
+
+    override val display =
+      Map(
+        Confirmed   -> "Genetische Diagnose gesichert",
+        Partial     -> "Klinischer Phänotyp nur partiell gelöst",
+        Provisional -> "Genetische Verdachtsdiagnose",
+        Unconfirmed -> "Keine genetische Diagnosestellung"
+      )
+    
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
+
+  }
+
+
+  object MissingCodeReason
+  extends CodedEnum("dnpm-dip/rd/diagnosis/missing-code-reason")
+  with DefaultCodeSystem
+  {
+    val NoMatchingCode = Value("no-matching-code")
+
+    override val display =
+      Map(
+        NoMatchingCode -> "Kein geeigneter Code (ICD-10-GM, ORDO, Alpha-ID-SE) verfügbar",
+      )
 
   }
 

@@ -1,9 +1,9 @@
 de.dnpm.dip.rd.model.RDDiagnosis$VerificationStatus$ProviderSPI
-de.dnpm.dip.rd.model.RDNGSReport$FamilyControlLevel$ProviderSPI
+de.dnpm.dip.rd.model.RDDiagnosis$FamilyControlLevel$ProviderSPI
 de.dnpm.dip.rd.model.ACMG$Class$ProviderSPI
 de.dnpm.dip.rd.model.ACMG$Criterion$Type$ProviderSPI
 de.dnpm.dip.rd.model.ACMG$Criterion$Modifier$ProviderSPI
 de.dnpm.dip.rd.model.Variant$Zygosity$ProviderSPI
 de.dnpm.dip.rd.model.Variant$SegregationAnalysis$ProviderSPI
-de.dnpm.dip.rd.model.Variant$InheritanceMode$ProviderSPI
+de.dnpm.dip.rd.model.Variant$ModeOfInheritance$ProviderSPI
 de.dnpm.dip.rd.model.Variant$Significance$ProviderSPI
