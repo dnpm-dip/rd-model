@@ -21,20 +21,20 @@ class CodeSystemTests extends AnyFlatSpec
 
   "Loading ValueSet dynamically via ValueSetProvider" must "have worked" in {
 
-    import RDDiagnosis.Category._
+    import RDDiagnosis.Systems._
 
     ValueSetProvider
       .getInstances[cats.Id]
       .map(_.uri)
       .toList must contain (
-        Coding.System[RDDiagnosis.Category].uri
+        Coding.System[RDDiagnosis.Systems].uri
       )
 
   }
 
-  "Serialized Codings of ValueSet 'RDDiagnosis.Category'" must "all have 'system' attribute" in {
+  "Serialized Codings of ValueSet 'RDDiagnosis.Systems'" must "all have 'system' attribute" in {
 
-    RDDiagnosis.Category
+    RDDiagnosis.Systems
       .valueSet
       .codings
       .pipe(toJson(_))

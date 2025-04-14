@@ -24,7 +24,7 @@ lazy val global = project
      dto_model,
      hpo,
      alpha_id_se,
-     omim,
+//     omim,
      orphanet,
      generators,
      tests
@@ -72,6 +72,7 @@ lazy val alpha_id_se = project
   )
   .dependsOn(dto_model)
 
+/*
 lazy val omim = project
   .settings(
     name := "omim-catalog",
@@ -81,6 +82,7 @@ lazy val omim = project
     )
   )
   .dependsOn(dto_model)
+*/
 
 lazy val generators = project
   .settings(
@@ -89,12 +91,17 @@ lazy val generators = project
     libraryDependencies ++= Seq(
       dependencies.scalatest,
       dependencies.generators,
+      dependencies.icd10gm,
+      dependencies.icd_catalogs,
       dependencies.atc_impl,
-      dependencies.atc_catalogs
+      dependencies.atc_catalogs,
+      dependencies.json_schema_validator
     )
   )
   .dependsOn(
-    dto_model
+    dto_model,
+    alpha_id_se % Test,
+    orphanet % Test
   )
 
 lazy val tests = project
@@ -110,8 +117,8 @@ lazy val tests = project
   )
   .dependsOn(
     dto_model,
-    orphanet % Test,
-    omim % Test,
+    alpha_id_se % Test,
+    orphanet % Test
   )
 
 
@@ -123,14 +130,15 @@ lazy val tests = project
 
 lazy val dependencies =
   new {
-    val scalatest    = "org.scalatest"          %% "scalatest"              % "3.2.17" % Test
-    val scala_xml    = "org.scala-lang.modules" %% "scala-xml"              % "2.0.1"
-    val core         = "de.dnpm.dip"            %% "core"                   % "1.0-SNAPSHOT"
-    val generators   = "de.ekut.tbi"            %% "generators"             % "1.0-SNAPSHOT"
-    val icd10gm      = "de.dnpm.dip"            %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
-    val icd_catalogs = "de.dnpm.dip"            %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
-    val atc_impl     = "de.dnpm.dip"            %% "atc-impl"               % "1.0-SNAPSHOT" % Test
-    val atc_catalogs = "de.dnpm.dip"            %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
+    val scalatest             = "org.scalatest"          %% "scalatest"              % "3.2.17" % Test
+    val scala_xml             = "org.scala-lang.modules" %% "scala-xml"              % "2.0.1"
+    val core                  = "de.dnpm.dip"            %% "core"                   % "1.0-SNAPSHOT"
+    val generators            = "de.ekut.tbi"            %% "generators"             % "1.0-SNAPSHOT"
+    val icd10gm               = "de.dnpm.dip"            %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
+    val icd_catalogs          = "de.dnpm.dip"            %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
+    val atc_impl              = "de.dnpm.dip"            %% "atc-impl"               % "1.0-SNAPSHOT" % Test
+    val atc_catalogs          = "de.dnpm.dip"            %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
+    val json_schema_validator = "com.networknt"          %  "json-schema-validator"  % "1.5.5"        % Test
   }
 
 

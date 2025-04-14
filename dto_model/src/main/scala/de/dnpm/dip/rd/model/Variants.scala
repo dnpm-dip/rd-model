@@ -19,6 +19,7 @@ import de.dnpm.dip.model.{
   Chromosome,
   Id,
   ExternalId,
+  GeneAlterationReference,
   Reference,
   Patient,
   Publication,
@@ -30,47 +31,10 @@ import play.api.libs.json.{
 }
 
 
-/*
+
 object Chromosome
-extends CodedEnum("chromosome")
-with DefaultCodeSystem
-{
-  val chr1,
-      chr2,
-      chr3,
-      chr4,
-      chr5,
-      chr6,
-      chr7,
-      chr8,
-      chr9,
-      chr10,
-      chr11,
-      chr12,
-      chr13,
-      chr14,
-      chr15,
-      chr16,
-      chr17,
-      chr18,
-      chr19,
-      chr20,
-      chr21,
-      chr22,
-      chrX,
-      chrY,
-      chrMT = Value
-
-  override val display = {
-    case chr => chr.toString
-  }
-
-  implicit val format: Format[Chromosome.Value] =
-    Json.formatEnum(this)
-}
-*/
-
-object Chromosome extends Enumeration with Chromosome
+extends Enumeration
+with Chromosome
 {
   val chrMT = Value
 
@@ -357,20 +321,19 @@ object Variant
   }
 
 
-  sealed trait Significance
   object Significance
   extends CodedEnum("dnpm-dip/rd/variant/significance")
   with DefaultCodeSystem
   {
-     val primary,
-         incidental,
-         candidate = Value
+     val Primary    = Value("primary")
+     val Incidental = Value("incidental")
+     val Candidate  = Value("candidate")
 
      override val display =
        Map(
-        primary    -> "Variant in context of patient's disease",
-        incidental -> "Incidental finding",
-        candidate  -> "Candidate variant"
+        Primary    -> "Variant in context of patient's disease",
+        Incidental -> "Incidental finding",
+        Candidate  -> "Candidate variant"
       )
 
 
@@ -382,7 +345,7 @@ object Variant
       
   }
 
-
+/*
   implicit val displays: Displays[Variant] =
     Displays[Variant]{
       case sv: SmallVariant =>
@@ -394,6 +357,53 @@ object Variant
       case cnv: CopyNumberVariant =>
         s"CNV ${cnv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")} ${cnv.proteinChange.orElse(cnv.gDNAChange).orElse(cnv.cDNAChange).map(_.value).getOrElse("")}"
     }
+*/
+
+  implicit val displays: Displays[Variant] =
+    Displays[Variant]{
+      variant =>
+        val genes =
+          variant.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")
+        
+        val chg =
+          variant.proteinChange.orElse(variant.gDNAChange).orElse(variant.cDNAChange).map(_.value).getOrElse("")
+
+        variant match {
+          case _: SmallVariant => s"SmallVariant $genes $chg"
+          
+          case _: StructuralVariant => s"StructuralVariant $genes $chg"
+          
+          case cnv: CopyNumberVariant => s"CNV $genes ${cnv.`type`.display.getOrElse("")}"
+        }
+    }
+
+
+  implicit def displaysGeneAlteration(
+    implicit res: Reference.Resolver[Variant]
+  ): Displays[GeneAlterationReference[Variant]] =
+    Displays[GeneAlterationReference[Variant]]{
+      case GeneAlterationReference(variantRef,gene,_) =>
+        variantRef.resolve.map {
+          variant =>
+
+            val genes =
+              gene.map(Set(_)).orElse(variant.genes).getOrElse(Set.empty).flatMap(_.display).mkString(",")
+            
+            val chg =
+              variant.proteinChange.orElse(variant.gDNAChange).orElse(variant.cDNAChange).map(_.value).getOrElse("")
+
+            variant match {
+              case _: SmallVariant => s"SmallVariant $genes $chg"
+              
+              case _: StructuralVariant => s"StructuralVariant $genes $chg"
+              
+              case cnv: CopyNumberVariant => s"CNV $genes ${cnv.`type`.display.getOrElse("")}"
+            }
+        }
+        .getOrElse("N/A")
+
+    }
+
 
 } // End object Variant
 
@@ -418,7 +428,6 @@ final case class SmallVariant
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
   modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
-//  clinVarID: Option[ExternalId[Variant,ClinVar]],
   externalIds: Option[List[ExternalId[Variant,ClinVar]]],
   publications: Option[Set[Reference[Publication]]]
 )
@@ -447,7 +456,6 @@ final case class StructuralVariant
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
   modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
-//  clinVarID: Option[ExternalId[Variant,ClinVar]],
   externalIds: Option[List[ExternalId[Variant,ClinVar]]],
   publications: Option[Set[Reference[Publication]]]
 )
@@ -479,7 +487,6 @@ final case class CopyNumberVariant
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
   modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
-//  clinVarID: Option[ExternalId[Variant,ClinVar]],
   externalIds: Option[List[ExternalId[Variant,ClinVar]]],
   publications: Option[Set[Reference[Publication]]]
 )

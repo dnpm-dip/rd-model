@@ -209,4 +209,5 @@ object RDDiagnosis
 
   implicit val format: OFormat[RDDiagnosis] =
     Json.format[RDDiagnosis]
+
 }

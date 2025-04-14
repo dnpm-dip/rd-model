@@ -38,6 +38,10 @@ trait Schemas extends BaseSchemas
       .toDefinition("EpisodeOfCare")
 
 
+  implicit val hpoTermStatusSchema: Schema[HPOTerm.Status] =
+    Json.schema[HPOTerm.Status]
+      .toDefinition("HPOTerm-Status")
+
   implicit val hpoTermSchema: Schema[HPOTerm] =
     Json.schema[HPOTerm]
       .toDefinition("HPOTerm")

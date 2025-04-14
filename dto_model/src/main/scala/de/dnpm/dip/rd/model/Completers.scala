@@ -6,12 +6,18 @@ import cats.{
   Applicative,
   Id
 }
-import de.dnpm.dip.util.Completer
+import de.dnpm.dip.util.{
+  Completer,
+  DisplayLabel
+}
 import de.dnpm.dip.model.BaseCompleters
 import de.dnpm.dip.coding.{
+  Code,
+  Coding,
   CodeSystem,
   CodeSystemProvider
 }
+import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.icd.ICD10GM
 
@@ -21,6 +27,8 @@ trait Completers extends BaseCompleters
 
   import Completer.syntax._
 
+
+  protected implicit val atc: CodeSystemProvider[ATC,Id,Applicative[Id]]
 
   protected implicit val hpOntology: CodeSystem[HPO]
 
@@ -32,17 +40,57 @@ trait Completers extends BaseCompleters
 
   protected implicit val icd10gm: CodeSystemProvider[ICD10GM,Id,Applicative[Id]]
 
+  protected implicit val orphaCodingCompleter: Completer[Coding[Orphanet]] = {
+
+//    val hasOrphaPrefix = "^ORPHA:.*$".r
+
+    val addOrphaPrefix =
+      (coding: Coding[Orphanet]) =>
+        coding.code match { 
+//          case Code(hasOrphaPrefix()) => coding
+          case Code(c) if c startsWith "ORPHA:" => coding
+
+          case Code(c) => coding.copy(code = Code[Orphanet](s"ORPHA:$c"))
+        }
+
+    addOrphaPrefix andThen Coding.completeByCodeSystem(ordo)
+  }
+
 
   implicit val diagnosisCompleter: Completer[RDDiagnosis] =
     diag => diag.copy(
+      familyControlLevel = diag.familyControlLevel.complete,
+      verificationStatus = diag.verificationStatus.complete,
       codes              = diag.codes.complete, 
-      verificationStatus = diag.verificationStatus.complete
+      missingCodeReason  = diag.missingCodeReason.complete,
     )
 
 
-  implicit val hpoTermCompleter: Completer[HPOTerm] =
+  implicit val hpoTermCompleter: Completer[HPOTerm] = {
+
+    implicit val statusCompleter: Completer[HPOTerm.Status] =
+      st => st.copy(
+        status = st.status.complete 
+      )
+
     hpo => hpo.copy(
-      value = hpo.value.complete
+      value = hpo.value.complete,
+      status = hpo.status.complete
+    )
+
+  }
+
+
+  implicit val gmfcsCompleter: Completer[GMFCSStatus] =
+    gmfcs => gmfcs.copy(
+      value = gmfcs.value.complete
+    )
+
+
+  implicit val hospitalizationCompleter: Completer[Hospitalization] =
+    hosp => hosp.copy(
+      numberOfStays = hosp.numberOfStays.complete,
+      numberOfDays = hosp.numberOfDays.complete
     )
 
 
@@ -107,18 +155,84 @@ trait Completers extends BaseCompleters
     )
   }
 
-  implicit val rdPatientRecordCompleter: Completer[RDPatientRecord] =
-    patRec => patRec.copy(
-      patient    = patRec.patient.complete,
-      diagnoses  = patRec.diagnoses.complete,
-      hpoTerms   = patRec.hpoTerms.complete,
-      ngsReports = patRec.ngsReports.complete
+
+  implicit def carePlanCompleter(
+    implicit variants: List[Variant]
+  ): Completer[RDCarePlan] = {
+
+    implicit val therapyRecommendationCompleter: Completer[RDTherapyRecommendation] =
+      rec => rec.copy(
+        category   = rec.category.complete,
+        `type`     = rec.`type`.complete,
+        medication = rec.medication.complete, 
+        supportingVariants =
+          rec.supportingVariants
+            .map(
+              _.map(ref => ref.withDisplay(DisplayLabel.of(ref).value))
+            )
+      )
+
+    implicit val studyRecommendationCompleter: Completer[RDStudyEnrollmentRecommendation] =
+      rec => rec.copy(
+        supportingVariants =
+          rec.supportingVariants
+            .map(
+              _.map(ref => ref.withDisplay(DisplayLabel.of(ref).value))
+            )
+      )
+
+    implicit val clinMgmtCompleter: Completer[ClinicalManagementRecommendation] =
+      rec => rec.copy(
+        `type` = rec.`type`.complete
+      )
+
+    cp => cp.copy(
+      statusReason                     = cp.statusReason.complete,
+      therapyRecommendations           = cp.therapyRecommendations.complete,
+      studyEnrollmentRecommendations   = cp.studyEnrollmentRecommendations.complete,
+      clinicalManagementRecommendation = cp.clinicalManagementRecommendation.complete 
     )
+  }
+
+
+  implicit val therapyCompleter: Completer[RDTherapy] =
+    th => th.copy(
+      category   = th.category.complete,
+      `type`     = th.`type`.complete,
+      medication = th.medication.complete, 
+    )
+
+
+  implicit val rdPatientRecordCompleter: Completer[RDPatientRecord] = {
+    patRec =>
+
+      implicit val variants =
+        patRec.ngsReports
+          .getOrElse(List.empty)
+          .flatMap(_.variants)
+
+      patRec.copy(
+        patient         = patRec.patient.complete,
+        diagnoses       = patRec.diagnoses.complete,
+        gmfcsStatus     = patRec.gmfcsStatus.complete,
+        hospitalization = patRec.hospitalization.complete,
+        hpoTerms        = patRec.hpoTerms.complete,
+        ngsReports      = patRec.ngsReports.complete,
+        carePlans       = patRec.carePlans.complete,
+        followUps       = patRec.followUps.complete,
+        therapies       = patRec.therapies.complete
+      )
+  }
 
 }
 
 object Completers extends Completers
 {
+
+  override implicit lazy val atc: CodeSystemProvider[ATC,Id,Applicative[Id]] =
+    ATC.Catalogs
+      .getInstance[cats.Id]
+      .get
 
   override implicit lazy val hpOntology: CodeSystem[HPO] =
     HPO.Ontology

@@ -1,29 +1,73 @@
 package de.dnpm.dip.rd.gens
 
 
-import scala.util.{
-  Try,
-  Random
-}
+import scala.util.Random
+import scala.util.chaining._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers._
 import de.ekut.tbi.generators.Gen
 import de.dnpm.dip.rd.model.RDPatientRecord
+import de.dnpm.dip.rd.model.json.Schemas
+import play.api.libs.json.Json.{
+  toJson,
+  stringify
+}
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.networknt.schema.{
+  JsonSchemaFactory,
+  SpecVersion
+}
+import scala.jdk.CollectionConverters._
+import json.Schema
+import json.schema.Version._
+import com.github.andyglow.jsonschema.AsPlay._
 
 
-
-class Tests extends AnyFlatSpec with Generators
+class Tests extends AnyFlatSpec
+with Generators
+with Schemas
 {
 
 
   implicit val rnd: Random = new Random
 
 
-  "Generating RDPatientRecord" must "have worked" in {
+  "Generated RDPatientRecord" must "conform to the JSON schema" in {
 
-    assert(
-      Try(Gen.of[RDPatientRecord].next) isSuccess
-    )
+    val schema =
+      JsonSchemaFactory
+        .getInstance(SpecVersion.VersionFlag.V202012)
+        .getSchema(
+          Schema[RDPatientRecord]
+            .asPlay(Draft12("https://dnpm-dip/rd/patient-record-schema.json"))
+            .pipe(stringify)
+        )
+
+    val jsonRecord =
+      new ObjectMapper().readTree(
+        Gen.of[RDPatientRecord].next
+/*        
+          .tap {
+             record =>
+              import java.io.FileWriter
+              import scala.util.Using
+              import play.api.libs.json.Json.prettyPrint
+          
+              Using(new FileWriter("/home/lucien/rd_patient_record.json")){
+                _.write(prettyPrint(toJson(record)))
+              }
+          }
+*/          
+          .pipe(toJson(_))
+          .pipe(stringify)
+      )
+
+    val errors =
+      schema.validate(jsonRecord)
+        .asScala
+        .tap(_.foreach(msg => println(msg.getMessage)))
+
+    errors must be (empty)
 
   }
 

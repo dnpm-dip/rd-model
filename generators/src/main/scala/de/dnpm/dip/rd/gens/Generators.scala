@@ -5,36 +5,42 @@ import java.time.{
   LocalDate,
   YearMonth
 }
+import java.time.temporal.ChronoUnit.YEARS
 import cats.data.NonEmptyList
-import de.ekut.tbi.generators.{
-  Gen,
-}
+import shapeless.Coproduct
+import de.ekut.tbi.generators.Gen
 import de.ekut.tbi.generators.DateTimeGens._
 import de.dnpm.dip.coding.{
+  Code,
   Coding,
   CodeSystem,
 }
+import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.atc.Kinds.Substance
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.{
   Id,
-  Age,
-  Duration,
+  Address,
+  BaseVariant,
   ExternalId,
+  FollowUp,
   Reference,
   Gender,
+  GeneAlterationReference,
+  HealthInsurance,
   History,
+  IK,
   NGSReport,
   Patient,
   Period,
   Publication,
   PubMed,
   Study,
-  UnitOfTime
 }
 import de.dnpm.dip.rd.model._
+import AlphaIDSE.extensions._
 
 
 trait Generators
@@ -45,19 +51,24 @@ trait Generators
       .map(Id(_))
 
 
-  implicit def genExtId[T]: Gen[ExternalId[T]] =
-    Gen.uuidStrings
-      .map(ExternalId(_,None))
-
-
-  def genExternalId[T,S: Coding.System]: Gen[ExternalId[T]] =
+  implicit def genExternalId[T,S: Coding.System]: Gen[ExternalId[T,S]] =
     Gen.uuidStrings
        .map(ExternalId[T,S](_))
 
 
+  implicit def genExternalIdSysUnion[T,S <: Coproduct](
+    implicit uris: Coding.System.UriSet[S]
+  ): Gen[ExternalId[T,S]] =
+    for {
+      sys <- Gen.oneOf(uris.values.toSeq)
+      id  <- Gen.uuidStrings
+    } yield ExternalId[T,S](id,sys)
+
+
+
   implicit def genReference[T]: Gen[Reference[T]] =
     Gen.of[Id[T]]
-      .map(Reference.from(_))
+      .map(Reference(_))
 
 
   implicit def genCodingfromCodeSystem[S: Coding.System: CodeSystem]: Gen[Coding[S]] =
@@ -77,16 +88,27 @@ trait Generators
     .map(Coding[HPO](_))
 
 
+  private implicit lazy val alphaIdSE: CodeSystem[AlphaIDSE] = 
+    AlphaIDSE.Catalogs
+      .getInstance[cats.Id]
+      .get
+      .latest
+      .filter(
+        c => c.isValid.exists(_ == true) && c.primaryCode1.isDefined && c.orphaCode.isDefined
+      )
+  
 
-  implicit val genOrphanetCoding: Gen[Coding[Orphanet]] =
-    Gen.oneOf(
-      "ORPHA:98907",
-      "ORPHA:98897",
-      "ORPHA:98408",
-      "ORPHA:98375",
-      "ORPHA:984"
-    )
-    .map(Coding[Orphanet](_))
+  private lazy val ordo: CodeSystem[Orphanet] =
+    Orphanet.Ordo
+      .getInstance[cats.Id]
+      .get
+      .latest
+
+  private lazy val icd10gm: CodeSystem[ICD10GM] =
+    ICD10GM.Catalogs
+      .getInstance[cats.Id]
+      .get
+      .latest
 
 
   private val atcRegex =
@@ -101,17 +123,11 @@ trait Generators
       .filter(ATC.filterByKind(Substance))
 
 
-
-  implicit def genDiagnosisCatagoryCoding: Gen[Coding[RDDiagnosis.Category]] =
-    Gen.of[Coding[Orphanet]]
-      .map(_.asInstanceOf[Coding[RDDiagnosis.Category]])
-
-
   implicit val genPubMedId: Gen[Reference[Publication]] =
     Gen.positiveInts
       .map(_.toString)
       .map(ExternalId[Publication,PubMed](_))
-      .map(Reference.from(_))
+      .map(Reference(_))
 
   private val genGender: Gen[Coding[Gender.Value]] =
     Gen.distribution(
@@ -121,48 +137,88 @@ trait Generators
     )
     .map(Coding(_))
 
+
   implicit val genPatient: Gen[Patient] =
     for {
-      id <-
-        Gen.of[Id[Patient]]
+      id <- Gen.of[Id[Patient]]
 
-      gender <-
-        genGender
-        
-      birthdate <-
+      gender <- genGender
+
+      birthDate <-
         localDatesBetween(
           LocalDate.now.minusYears(70),
-          LocalDate.now.minusYears(25)
+          LocalDate.now.minusYears(30)
         )
-    } yield
-      Patient(
-        id,
-        gender,
-        birthdate,
-        None,
-        None,
-        None,
-        None
-      )
 
+      age = YEARS.between(birthDate,LocalDate.now)
+
+      dateOfDeath <-
+        Gen.option(
+          Gen.longsBetween(age - 20L, age - 5L)
+            .map(birthDate.plusYears),
+          0.4
+        )
+
+      healthInsurance =
+        Patient.Insurance(
+          Coding(HealthInsurance.Type.GKV),
+          Some(
+            Reference(ExternalId[HealthInsurance,IK]("1234567890"))
+              .withDisplay("AOK")
+            )
+        )
+
+    } yield Patient(
+      id,
+      gender,
+      birthDate,
+      dateOfDeath,
+      None,
+      healthInsurance,
+      Address("12345")
+    )
 
   def genDiagnosis(
     patient: Patient,
   ): Gen[RDDiagnosis] =
     for {
-      id       <- Gen.of[Id[RDDiagnosis]]
-      date     <- Gen.const(LocalDate.now).map(Some(_))
-      category <- Gen.of[Coding[RDDiagnosis.Category]]
-      onsetAge <- Gen.intsBetween(12,42).map(i => Age(i.toDouble))
-      status   <- Gen.of[Coding[RDDiagnosis.VerificationStatus.Value]]
+      id <- Gen.of[Id[RDDiagnosis]]
+
+      date = LocalDate.now
+
+      onsetMonth <-
+        Gen.longsBetween(6,12)
+          .map(date.minusMonths)
+          .map(YearMonth.from)
+
+      controlLevel <- Gen.of[Coding[RDDiagnosis.FamilyControlLevel.Value]]
+
+      status <- Gen.of[Coding[RDDiagnosis.VerificationStatus.Value]]
+
+      codes <-
+         for {
+           alpha <- Gen.oneOf(alphaIdSE.concepts)
+           orpha = alpha.orphaCode.flatMap(ordo.concept)
+           icd10 = alpha.primaryCode1.flatMap(icd10gm.concept)
+         } yield
+           NonEmptyList.of(alpha.toCodingOf[RDDiagnosis.Systems]) ++
+             orpha.map(_.toCodingOf[RDDiagnosis.Systems]).toList ++
+             icd10.map(_.toCodingOf[RDDiagnosis.Systems]).toList
+
+      missingCode =
+        Option.when(codes.size != 3)(Coding(RDDiagnosis.MissingCodeReason.NoMatchingCode))
+
     } yield
       RDDiagnosis(
         id,
         Reference.to(patient),
         date,
-        NonEmptyList.one(category),
-        Some(onsetAge),
-        status
+        onsetMonth,
+        controlLevel,
+        status,
+        codes,
+        missingCode,
+        Some(List("Notes on the disease..."))
       )
 
 
@@ -178,21 +234,28 @@ trait Generators
         Period(LocalDate.now)
       )
 
+
   def genHPOTerm(
     patient: Patient
   ): Gen[HPOTerm] =
     for {
       id     <- Gen.of[Id[HPOTerm]]
+
+      date   = LocalDate.now.minusMonths(2)
+
       value  <- Gen.of[Coding[HPO]]
+
       status <- Gen.of[Coding[HPOTerm.Status.Value]]
+
     } yield
       HPOTerm(
         id,
         Reference.to(patient),
-        YearMonth.now.minusMonths(5),
+        Some(date),
+        Some(YearMonth.now.minusMonths(6)),
         value,
         Some(
-          List(
+          History(
             HPOTerm.Status(
               status,
               LocalDate.now
@@ -240,7 +303,8 @@ trait Generators
       "NC_000023.11:g.pter_qtersup",
       "NC_000023.11:g.33344590_33344592=/dup",
     )
-    .map(Coding[HGVS.DNA](_))
+    .map(Code[HGVS.DNA](_))
+//    .map(Coding[HGVS.DNA](_))
 
   private val proteinChanges =
     Seq(
@@ -250,7 +314,8 @@ trait Generators
       "LRG_199p1:p.Trp24=/Cys",
       "NP_003997.2:p.Val7dup",
     )
-    .map(Coding[HGVS.Protein](_))
+    .map(Code[HGVS.Protein](_))
+//    .map(Coding[HGVS.Protein](_))
 
 
   implicit val genAcmgCriterion: Gen[ACMG.Criterion] =
@@ -271,9 +336,9 @@ trait Generators
   ): Gen[SmallVariant] =
     for {
       id    <- Gen.of[Id[SmallVariant]]
-      chr   <- Gen.of[Coding[Chromosome.Value]]
+      chr   <- Gen.`enum`(Chromosome)
       gene  <- Gen.of[Coding[HGNC]]
-      localization <- Gen.of[Coding[Variant.Localization.Value]]
+      localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
       pos   <- Gen.positiveInts
       ref   <- Gen.oneOf(bases)
       alt   <- Gen.oneOf((bases.toSet - ref).toSeq)
@@ -287,7 +352,7 @@ trait Generators
         )
       zygosity <- Gen.of[Coding[Variant.Zygosity.Value]]
       segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis.Value]]
-      inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
+      inh <- Gen.of[Coding[Variant.ModeOfInheritance.Value]]
       signif <- Gen.of[Coding[Variant.Significance.Value]]
       clinVarId <- genExternalId[SmallVariant,ClinVar]
       pmid <- Gen.of[Reference[Publication]]
@@ -310,7 +375,7 @@ trait Generators
         Some(segAnalysis),
         Some(inh),
         Some(signif),
-        Some(clinVarId),
+        Some(List(clinVarId)),
         Some(Set(pmid))
       )
 
@@ -320,8 +385,8 @@ trait Generators
     for {
       id    <- Gen.of[Id[SmallVariant]]
       gene  <- Gen.of[Coding[HGNC]]
-      localization <- Gen.of[Coding[Variant.Localization.Value]]
-      iscn  <- Gen.const(Coding[ISCN]("Some ISCN description"))
+      localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
+      iscn  = Code[ISCN]("ISCN description...")
       dnaChg <- Gen.oneOf(gDNAChanges)
       proteinChg <- Gen.oneOf(proteinChanges)
       acmgClass <- Gen.of[Coding[ACMG.Class.Value]]
@@ -332,7 +397,7 @@ trait Generators
         )
       zygosity <- Gen.of[Coding[Variant.Zygosity.Value]]
       segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis.Value]]
-      inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
+      inh <- Gen.of[Coding[Variant.ModeOfInheritance.Value]]
       signif <- Gen.of[Coding[Variant.Significance.Value]]
       clinVarId <- genExternalId[SmallVariant,ClinVar]
       pmid <- Gen.of[Reference[Publication]]
@@ -352,7 +417,7 @@ trait Generators
         Some(segAnalysis),
         Some(inh),
         Some(signif),
-        Some(clinVarId),
+        Some(List(clinVarId)),
         Some(Set(pmid))
       )
 
@@ -361,9 +426,9 @@ trait Generators
   ): Gen[CopyNumberVariant] =
     for {
       id    <- Gen.of[Id[SmallVariant]]
-      chr   <- Gen.of[Coding[Chromosome.Value]]
+      chr   <- Gen.`enum`(Chromosome)
       gene  <- Gen.of[Coding[HGNC]]
-      localization <- Gen.of[Coding[Variant.Localization.Value]]
+      localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
       start <- Gen.positiveInts
       end   <- Gen.positiveInts
       typ   <- Gen.of[Coding[CopyNumberVariant.Type.Value]]
@@ -377,7 +442,7 @@ trait Generators
         )
       zygosity <- Gen.of[Coding[Variant.Zygosity.Value]]
       segAnalysis <- Gen.of[Coding[Variant.SegregationAnalysis.Value]]
-      inh <- Gen.of[Coding[Variant.InheritanceMode.Value]]
+      inh <- Gen.of[Coding[Variant.ModeOfInheritance.Value]]
       signif <- Gen.of[Coding[Variant.Significance.Value]]
       clinVarId <- genExternalId[SmallVariant,ClinVar]
       pmid <- Gen.of[Reference[Publication]]
@@ -400,7 +465,7 @@ trait Generators
         Some(segAnalysis),
         Some(inh),
         Some(signif),
-        Some(clinVarId),
+        Some(List(clinVarId)),
         Some(Set(pmid))
       )
 
@@ -411,9 +476,7 @@ trait Generators
   ): Gen[RDNGSReport] =
     for {
       id  <- Gen.of[Id[RDNGSReport]]
-      lab <- Gen.of[Id[Lab]].map(Reference.from(_).copy(display = Some("Lab name")))
-      typ <- Gen.of[Coding[NGSReport.SequencingType.Value]]
-      familyControl <- Gen.of[Coding[RDNGSReport.FamilyControlLevel.Value]]
+      typ <- Gen.of[Coding[NGSReport.Type.Value]]
 
       metaInfo <-
         for {
@@ -430,25 +493,28 @@ trait Generators
       RDNGSReport(
         id,
         Reference.to(patient),
-        lab,
         LocalDate.now,
         typ,
-        familyControl,
         metaInfo,
-        Some(autoZyg),
-        Some(smallVariants),
-        Some(cnvs),
-        Some(svs),
+        Some(
+          RDNGSReport.Results(
+            Some(autoZyg),
+            Some(smallVariants),
+            Some(cnvs),
+            Some(svs)
+          )
+        )
       )
 
 
   def genTherapyRecommendation(
     patient: Patient,
-    variants: Seq[Reference[Variant]]
+    variants: Seq[Variant]
   ): Gen[RDTherapyRecommendation] =
     for {
       id <- Gen.of[Id[RDTherapyRecommendation]]
       category <- Gen.of[Coding[RDTherapy.Category.Value]]
+      typ  <- Gen.of[Coding[RDTherapy.Type.Value]]
       medication <- Gen.of[Coding[ATC]]
       supportingVariant <- Gen.oneOf(variants)
     } yield RDTherapyRecommendation(
@@ -456,14 +522,17 @@ trait Generators
       Reference.to(patient),
       LocalDate.now,
       category,
+      typ,
       Some(Set(medication)),
-      Some(List(supportingVariant))
+      Some(
+        List(GeneAlterationReference.to(supportingVariant))
+      )
     )
 
 
   def genCarePlan(
     patient: Patient,
-    variants: Seq[Reference[Variant]]
+    variants: Seq[Variant]
   ): Gen[RDCarePlan] =
     for {
       id <- Gen.of[Id[RDCarePlan]]
@@ -476,17 +545,18 @@ trait Generators
           variants
         )
 
+      statusReason <- Gen.of[Coding[RDCarePlan.StatusReason.Value]]
+
       studyEnrollmentRecommendation <-
         for {
           stId <- Gen.of[Id[RDStudyEnrollmentRecommendation]]
-          studyNr <- Gen.intsBetween(10000000,50000000)
-                     .map(s => ExternalId[Study](s"$s","???"))
+          studyRef <- Gen.of[ExternalId[Study,Study.Registries]].map(Reference(_))
         } yield RDStudyEnrollmentRecommendation(
           stId,
           Reference.to(patient),
           LocalDate.now,
           recommendation.supportingVariants,
-          Some(List(studyNr))
+          NonEmptyList.of(studyRef)
         )
 
       clinicalManagementRecommendation <-
@@ -497,18 +567,21 @@ trait Generators
           recId,
           Reference.to(patient),
           LocalDate.now,
-          typ
+          typ,
+          Some(List("Description of clinical management..."))
         )
 
     } yield RDCarePlan(
       id,
       Reference.to(patient),
       LocalDate.now,
+      Some(statusReason),
+      Some(true),
       Some(true),
       Some(List(recommendation)),
-      Some(studyEnrollmentRecommendation),
+      Some(List(studyEnrollmentRecommendation)),
       Some(clinicalManagementRecommendation),
-      Some(protocol)
+      Some(List(protocol))
     )
 
 
@@ -518,7 +591,7 @@ trait Generators
   ): Gen[History[RDTherapy]] =
     for { 
       id <- Gen.of[Id[RDTherapy]]
-      notes <- Gen.const("Notes on the therapy...")
+      notes = "Notes on the therapy..."
     } yield History(
       RDTherapy(
         id,
@@ -526,9 +599,10 @@ trait Generators
         Some(Reference.to(recommendation)),
         LocalDate.now,
         Some(recommendation.category),
+        Some(recommendation.`type`),
         recommendation.medication,
         Some(Period(recommendation.issuedOn)),
-        Some(notes)
+        Some(List(notes))
       )
     )
 
@@ -546,22 +620,13 @@ trait Generators
       value
     )
 
-  def genHospitalization(
-    patient: Patient
-  ): Gen[Hospitalization] =
+  implicit val genHospitalization: Gen[Hospitalization] =
     for { 
-      id <- Gen.of[Id[Hospitalization]]
-      days <- Gen.intsBetween(5,42)
+      stays <- Gen.of[Coding[Hospitalization.NumberOfStays.Value]]
+      days <- Gen.of[Coding[Hospitalization.NumberOfDays.Value]]
     } yield Hospitalization(
-      id,
-      Reference.to(patient),
-      Some(
-        Period(
-          LocalDate.now.minusYears(5),
-          LocalDate.now
-        )
-      ),
-      Duration(days.toDouble,UnitOfTime.Days)
+      stays,
+      days
     )
 
   implicit val genRDPatientRecord: Gen[RDPatientRecord] =
@@ -582,8 +647,7 @@ trait Generators
         )
         .map(_.distinctBy(_.value.code))
 
-      hospitalization <-
-        genHospitalization(patient) 
+      hospitalization <-  Gen.of[Hospitalization]
 
       gmfcsStatus <-
         genGMFCS(patient)
@@ -591,11 +655,35 @@ trait Generators
       ngsReport <-
         genNGSReport(patient)
 
+      initBoardPlan <-
+        for { 
+          id <- Gen.of[Id[RDCarePlan]]
+        } yield RDCarePlan(
+          id,
+          patRef,
+          LocalDate.now.minusWeeks(2),
+          None,
+          None,
+          None,
+          None,
+          None,
+          None,
+          None
+        )
+
       carePlan <-
         genCarePlan(
           patient,
-          ngsReport.variants.map(Reference.to(_))
+          ngsReport.variants
         ) 
+
+      followUp =
+        FollowUp(
+          LocalDate.now,
+          patRef,
+          Some(LocalDate.now.minusDays(3)),
+          None
+        )
 
       therapy <-
         genTherapy(
@@ -607,12 +695,13 @@ trait Generators
       RDPatientRecord(
         patient,
         NonEmptyList.one(episode),
-        diag,
+        NonEmptyList.one(diag),
         Some(List(gmfcsStatus)),
         Some(hospitalization),
         NonEmptyList.fromListUnsafe(hpoTerms),
         Some(List(ngsReport)),
-        Some(List(carePlan)),
+        Some(List(initBoardPlan,carePlan)),
+        Some(List(followUp)),
         Some(List(therapy))
       )
 

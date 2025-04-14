@@ -48,22 +48,11 @@ object HPO extends CodeSystem.Publisher[HPO]
       valueSet    = None
     )
 
-/*  
-  val Synonyms =
-    CodeSystem.Property[String](
-      name        = "synonyms",
-      description = Some("Synonyms for the concept, i.e. alternatives for the main label in field 'lbl'"),
-      valueSet    = None
-    )
-*/
-
-
   override val properties: List[CodeSystem.Property] =
     List(
       Type,
       Definition,
-      SuperClasses,
-//      Synonyms
+      SuperClasses
     )
 
 

@@ -11,6 +11,7 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.model.{
   CarePlan,
+  Commentable,
   Id,
   Reference,
   ExternalReference,
@@ -78,8 +79,10 @@ final case class ClinicalManagementRecommendation
   id: Id[ClinicalManagementRecommendation],
   patient: Reference[Patient],
   issuedOn: LocalDate,
-  `type`: Coding[ClinicalManagementRecommendation.Type.Value]
+  `type`: Coding[ClinicalManagementRecommendation.Type.Value],
+  notes: Option[List[String]]
 )
+extends Commentable
 
 object ClinicalManagementRecommendation
 {
@@ -139,27 +142,6 @@ extends CarePlan
 
 object RDCarePlan
 {
-/*
-  object StatusReason
-  extends CodedEnum("dnpm-dip/rd/careplan/status-reason")
-  with DefaultCodeSystem
-  {
-    val TargetedDiagnosticsRecommended = Value("targeted-diagnostics-recommended")
-    val PsychosomaticDisease           = Value("psychosomatic-disease")
-    val NotRareDisease                 = Value("not-rare-disease")
-    val NonGeneticCause                = Value("non-genetic-cause")
-    val Other                          = Value("other")
-
-    override val display =
-      Map(
-        TargetedDiagnosticsRecommended -> "Zieldiagnostik empfohlen",
-        PsychosomaticDisease           -> "Wahrscheinlich psychosomatische Erkrankung",
-        NotRareDisease                 -> "Wahrscheinlich häufige Erkrankung",
-        NonGeneticCause                -> "Wahrscheinlich nicht genetische Ursache",
-        Other                          -> "Anderer Grund" 
-      )
-  }
-*/
 
   object StatusReason
   extends CodedEnum("dnpm-dip/rd/careplan/status-reason")

@@ -22,10 +22,20 @@ class Tests extends AnyFlatSpec
     val schema =
       Schema[RDPatientRecord].asPlay(Draft12("RD-Patient-Record"))
         .pipe(Json.prettyPrint(_))
-//        .tap(println(_))
+       .tap {
+          sch =>
+            import java.io.FileWriter
+            import scala.util.Using
 
-     schema must not contain ("Coding[")
-     schema must contain noneOf ("head","tail")
+            Using(new FileWriter("/home/lucien/rd_patient_record_schema.json")){
+              _.write(sch)
+            }
+        }
+
+    schema must not include ("Coding[")
+    schema must not include ("head")
+    schema must not include ("tail")
+
   }
 
 }
