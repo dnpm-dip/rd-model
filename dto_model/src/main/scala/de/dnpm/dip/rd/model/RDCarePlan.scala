@@ -145,7 +145,7 @@ object RDCarePlan
 
   object StatusReason
   extends CodedEnum("dnpm-dip/rd/careplan/status-reason")
-  with CarePlan.NonInclusionReason
+  with CarePlan.NoSequencingPerformedReason
   with DefaultCodeSystem
   {
     override val display = defaultDisplay
