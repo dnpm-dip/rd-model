@@ -1,7 +1,6 @@
 package de.dnpm.dip.rd.model
 
 
-import scala.util.chaining._
 import cats.{
   Applicative,
   Id
@@ -42,12 +41,9 @@ trait Completers extends BaseCompleters
 
   protected implicit val orphaCodingCompleter: Completer[Coding[Orphanet]] = {
 
-//    val hasOrphaPrefix = "^ORPHA:.*$".r
-
     val addOrphaPrefix =
       (coding: Coding[Orphanet]) =>
         coding.code match { 
-//          case Code(hasOrphaPrefix()) => coding
           case Code(c) if c startsWith "ORPHA:" => coding
 
           case Code(c) => coding.copy(code = Code[Orphanet](s"ORPHA:$c"))
@@ -140,7 +136,7 @@ trait Completers extends BaseCompleters
 
     ngs => ngs.copy(
       `type` = ngs.`type`.complete,
-      sequencingInfo = ngs.sequencingInfo.pipe(
+      sequencingInfo = ngs.sequencingInfo.map(
         seqInfo => seqInfo.copy(
           platform = seqInfo.platform.complete,
         )

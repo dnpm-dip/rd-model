@@ -486,6 +486,7 @@ trait Generators
           "Kit..."
         )
       autoZyg <- genAutozygosity(patient)
+      conclusion <- Gen.of[Coding[RDNGSReport.Conclusion.Value]]
       smallVariants <- Gen.list(Gen.intsBetween(3,5),genSmallVariant(patient))
       cnvs <- Gen.list(Gen.intsBetween(3,5),genCopyNumberVariant(patient))
       svs <- Gen.list(Gen.intsBetween(3,5),genStructuralVariant(patient))
@@ -495,7 +496,8 @@ trait Generators
         Reference.to(patient),
         LocalDate.now,
         typ,
-        metaInfo,
+        Some(metaInfo),
+        Some(conclusion),
         Some(
           RDNGSReport.Results(
             Some(autoZyg),
