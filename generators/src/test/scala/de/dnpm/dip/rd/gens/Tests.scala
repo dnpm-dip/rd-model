@@ -46,18 +46,6 @@ with Schemas
     val jsonRecord =
       new ObjectMapper().readTree(
         Gen.of[RDPatientRecord].next
-/*        
-          .tap {
-             record =>
-              import java.io.FileWriter
-              import scala.util.Using
-              import play.api.libs.json.Json.prettyPrint
-          
-              Using(new FileWriter("/home/lucien/rd_patient_record.json")){
-                _.write(prettyPrint(toJson(record)))
-              }
-          }
-*/          
           .pipe(toJson(_))
           .pipe(stringify)
       )
