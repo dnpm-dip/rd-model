@@ -547,7 +547,7 @@ trait Generators
           variants
         )
 
-      statusReason <- Gen.of[Coding[RDCarePlan.StatusReason.Value]]
+//      statusReason <- Gen.of[Coding[RDCarePlan.StatusReason.Value]]
 
       studyEnrollmentRecommendation <-
         for {
@@ -577,7 +577,7 @@ trait Generators
       id,
       Reference.to(patient),
       LocalDate.now,
-      Some(statusReason),
+      None,
       Some(true),
       Some(true),
       Some(List(recommendation)),

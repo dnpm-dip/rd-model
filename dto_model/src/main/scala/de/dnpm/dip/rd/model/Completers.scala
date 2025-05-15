@@ -183,7 +183,7 @@ trait Completers extends BaseCompleters
       )
 
     cp => cp.copy(
-      statusReason                     = cp.statusReason.complete,
+      noSequencingPerformedReason      = cp.noSequencingPerformedReason.complete,
       therapyRecommendations           = cp.therapyRecommendations.complete,
       studyEnrollmentRecommendations   = cp.studyEnrollmentRecommendations.complete,
       clinicalManagementRecommendation = cp.clinicalManagementRecommendation.complete 

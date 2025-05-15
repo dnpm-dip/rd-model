@@ -123,7 +123,7 @@ final case class RDCarePlan
   id: Id[RDCarePlan],
   patient: Reference[Patient],
   issuedOn: LocalDate,
-  statusReason: Option[Coding[RDCarePlan.StatusReason.Value]],
+  noSequencingPerformedReason: Option[Coding[CarePlan.NoSequencingPerformedReason.Value]],
   geneticCounselingRecommended: Option[Boolean],
   reevaluationRecommended: Option[Boolean],
   therapyRecommendations: Option[List[RDTherapyRecommendation]],
@@ -133,8 +133,6 @@ final case class RDCarePlan
 )
 extends CarePlan
 {
-  type StatusReason = RDCarePlan.StatusReason.type
-
   override val reason = None
   override val medicationRecommendations = None
 }
@@ -142,7 +140,7 @@ extends CarePlan
 
 object RDCarePlan
 {
-
+/*
   object StatusReason
   extends CodedEnum("dnpm-dip/rd/careplan/status-reason")
   with CarePlan.NoSequencingPerformedReason
@@ -150,7 +148,7 @@ object RDCarePlan
   {
     override val display = defaultDisplay
   }
-
+*/
 
   implicit val format: OFormat[RDCarePlan] =
     Json.format[RDCarePlan]
