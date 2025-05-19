@@ -111,7 +111,6 @@ object ClinicalManagementRecommendation
       )
   }
 
-
   implicit val format: OFormat[ClinicalManagementRecommendation] =
     Json.format[ClinicalManagementRecommendation]
 }
@@ -140,16 +139,6 @@ extends CarePlan
 
 object RDCarePlan
 {
-/*
-  object StatusReason
-  extends CodedEnum("dnpm-dip/rd/careplan/status-reason")
-  with CarePlan.NoSequencingPerformedReason
-  with DefaultCodeSystem
-  {
-    override val display = defaultDisplay
-  }
-*/
-
   implicit val format: OFormat[RDCarePlan] =
     Json.format[RDCarePlan]
 }

@@ -130,7 +130,7 @@ lazy val tests = project
 
 lazy val dependencies =
   new {
-    val scalatest             = "org.scalatest"          %% "scalatest"              % "3.2.17" % Test
+    val scalatest             = "org.scalatest"          %% "scalatest"              % "3.2.18" % Test
     val scala_xml             = "org.scala-lang.modules" %% "scala-xml"              % "2.0.1"
     val core                  = "de.dnpm.dip"            %% "core"                   % "1.0-SNAPSHOT"
     val generators            = "de.ekut.tbi"            %% "generators"             % "1.0-SNAPSHOT"
@@ -138,7 +138,7 @@ lazy val dependencies =
     val icd_catalogs          = "de.dnpm.dip"            %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
     val atc_impl              = "de.dnpm.dip"            %% "atc-impl"               % "1.0-SNAPSHOT" % Test
     val atc_catalogs          = "de.dnpm.dip"            %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
-    val json_schema_validator = "com.networknt"          %  "json-schema-validator"  % "1.5.5"        % Test
+    val json_schema_validator = "com.networknt"          %  "json-schema-validator"  % "1.5.6"        % Test
   }
 
 
