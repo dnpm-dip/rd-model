@@ -25,6 +25,7 @@ import de.dnpm.dip.model.{
   Address,
   BaseVariant,
   ExternalId,
+  ExternalReference,
   FollowUp,
   Reference,
   Gender,
@@ -532,6 +533,38 @@ trait Generators
     )
 
 
+  implicit val genStudyRef: Gen[ExternalReference[Study,Study.Registries]] = {
+
+    import Study.Registries._
+
+    val nctIdGen =
+      for { id <- Gen.numeric(8) } yield s"NCT$id"
+
+    val drksIdGen =
+      for { id <- Gen.numeric(5) } yield s"DRKS000$id"
+
+    val eudraIdGen =
+      for {
+        part1 <- Gen.numeric(4)
+        part2 <- Gen.numeric(6)
+        part3 <- Gen.numeric(2)
+        part4 <- Gen.numeric(2)
+      } yield s"$part1-$part2-$part3-$part4"
+
+    val studyIdGens =
+      Map(
+        Coding.System[NCT].uri     -> nctIdGen,
+        Coding.System[DRKS].uri    -> drksIdGen,
+        Coding.System[EudraCT].uri -> eudraIdGen
+      )
+
+    for {
+      sys <- Gen.oneOf(studyIdGens.keys.toSeq)
+      id  <- studyIdGens(sys)
+    } yield Reference(ExternalId(id,sys))
+  }
+
+
   def genCarePlan(
     patient: Patient,
     variants: Seq[Variant]
@@ -547,12 +580,10 @@ trait Generators
           variants
         )
 
-//      statusReason <- Gen.of[Coding[RDCarePlan.StatusReason.Value]]
-
       studyEnrollmentRecommendation <-
         for {
           stId <- Gen.of[Id[RDStudyEnrollmentRecommendation]]
-          studyRef <- Gen.of[ExternalId[Study,Study.Registries]].map(Reference(_))
+          studyRef <- Gen.of[ExternalReference[Study,Study.Registries]]
         } yield RDStudyEnrollmentRecommendation(
           stId,
           Reference.to(patient),
