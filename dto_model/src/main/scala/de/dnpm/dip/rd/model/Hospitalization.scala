@@ -51,7 +51,7 @@ object Hospitalization
   {
     val Zero          = Value("none")
     val UpToFive      = Value("up-to-five")
-    val UpToFifteen   = Value("up-to-tifteen")
+    val UpToFifteen   = Value("up-to-fifteen")
     val UpToFifty     = Value("up-to-fifty")
     val OverFifty     = Value("over-fifty")
     val Unknown       = Value("unknown")
