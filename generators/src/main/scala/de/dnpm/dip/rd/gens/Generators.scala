@@ -365,6 +365,7 @@ trait Generators
         Some(Set(gene)),
         Some(Set(localization)),
         pos,
+        pos + ref.length,
         ref,
         alt,
         Some(dnaChg),
@@ -733,7 +734,7 @@ trait Generators
         Some(hospitalization),
         NonEmptyList.fromListUnsafe(hpoTerms),
         Some(List(ngsReport)),
-        Some(List(initBoardPlan,carePlan)),
+        NonEmptyList.of(initBoardPlan,carePlan),
         Some(List(followUp)),
         Some(List(therapy))
       )

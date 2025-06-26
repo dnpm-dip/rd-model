@@ -24,7 +24,7 @@ final case class RDPatientRecord
   hospitalization: Option[Hospitalization],
   hpoTerms: NonEmptyList[HPOTerm],
   ngsReports: Option[List[RDNGSReport]],
-  carePlans: Option[List[RDCarePlan]],
+  carePlans: NonEmptyList[RDCarePlan],
   followUps: Option[List[FollowUp]],
   therapies: Option[List[History[RDTherapy]]]
 )
@@ -32,7 +32,11 @@ extends PatientRecord
 {
   override val systemicTherapies = None
 
+  override def getCarePlans = carePlans.toList
+
   def getNgsReports = ngsReports.getOrElse(List.empty)
+
+
 }
 
 object RDPatientRecord

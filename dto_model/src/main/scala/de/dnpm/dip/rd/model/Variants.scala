@@ -404,7 +404,6 @@ object Variant
 
     }
 
-
 } // End object Variant
 
 
@@ -416,7 +415,9 @@ final case class SmallVariant
   chromosome: Chromosome.Value,
   genes: Option[Set[Coding[HGNC]]],
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
-  position: Int,
+//  position: Int,
+  startPosition: Int,
+  endPosition: Int,
   ref: String,
   alt: String,
   cDNAChange: Option[Code[HGVS.DNA]],
