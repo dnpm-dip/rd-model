@@ -224,9 +224,9 @@ sealed abstract class Variant extends BaseVariant
   val cDNAChange: Option[Code[HGVS.DNA]]
   val gDNAChange: Option[Code[HGVS.DNA]]
   val proteinChange: Option[Code[HGVS.Protein]]
-  val acmgClass: Coding[ACMG.Class.Value]
+  val acmgClass: Option[Coding[ACMG.Class.Value]]
   val acmgCriteria: Option[Set[ACMG.Criterion]]
-  val zygosity: Coding[Variant.Zygosity.Value]
+  val zygosity: Option[Coding[Variant.Zygosity.Value]]
   val segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]]
   val modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]]
   val significance: Option[Coding[Variant.Significance.Value]]
@@ -345,19 +345,6 @@ object Variant
       
   }
 
-/*
-  implicit val displays: Displays[Variant] =
-    Displays[Variant]{
-      case sv: SmallVariant =>
-        s"SmallVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.value).getOrElse("")}"
-
-      case sv: StructuralVariant =>
-        s"StructuralVariant ${sv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${sv.proteinChange.orElse(sv.gDNAChange).orElse(sv.cDNAChange).map(_.value).getOrElse("")}"
-
-      case cnv: CopyNumberVariant =>
-        s"CNV ${cnv.genes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")} ${cnv.proteinChange.orElse(cnv.gDNAChange).orElse(cnv.cDNAChange).map(_.value).getOrElse("")}"
-    }
-*/
 
   implicit val displays: Displays[Variant] =
     Displays[Variant]{
@@ -415,7 +402,6 @@ final case class SmallVariant
   chromosome: Chromosome.Value,
   genes: Option[Set[Coding[HGNC]]],
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
-//  position: Int,
   startPosition: Int,
   endPosition: Int,
   ref: String,
@@ -423,9 +409,9 @@ final case class SmallVariant
   cDNAChange: Option[Code[HGVS.DNA]],
   gDNAChange: Option[Code[HGVS.DNA]],
   proteinChange: Option[Code[HGVS.Protein]],
-  acmgClass: Coding[ACMG.Class.Value],
+  acmgClass: Option[Coding[ACMG.Class.Value]],
   acmgCriteria: Option[Set[ACMG.Criterion]],
-  zygosity: Coding[Variant.Zygosity.Value],
+  zygosity: Option[Coding[Variant.Zygosity.Value]],
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
   modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
@@ -451,9 +437,9 @@ final case class StructuralVariant
   cDNAChange: Option[Code[HGVS.DNA]],
   gDNAChange: Option[Code[HGVS.DNA]],
   proteinChange: Option[Code[HGVS.Protein]],
-  acmgClass: Coding[ACMG.Class.Value],
+  acmgClass: Option[Coding[ACMG.Class.Value]],
   acmgCriteria: Option[Set[ACMG.Criterion]],
-  zygosity: Coding[Variant.Zygosity.Value],
+  zygosity: Option[Coding[Variant.Zygosity.Value]],
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
   modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
@@ -482,9 +468,9 @@ final case class CopyNumberVariant
   cDNAChange: Option[Code[HGVS.DNA]],
   gDNAChange: Option[Code[HGVS.DNA]],
   proteinChange: Option[Code[HGVS.Protein]],
-  acmgClass: Coding[ACMG.Class.Value],
+  acmgClass: Option[Coding[ACMG.Class.Value]],
   acmgCriteria: Option[Set[ACMG.Criterion]],
-  zygosity: Coding[Variant.Zygosity.Value],
+  zygosity: Option[Coding[Variant.Zygosity.Value]],
   segregationAnalysis: Option[Coding[Variant.SegregationAnalysis.Value]],
   modeOfInheritance: Option[Coding[Variant.ModeOfInheritance.Value]],
   significance: Option[Coding[Variant.Significance.Value]],
