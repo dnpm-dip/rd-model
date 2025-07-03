@@ -26,12 +26,11 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
-  Format,
   OFormat
 }
 
 
-
+/*
 object Chromosome
 extends Enumeration
 with Chromosome
@@ -41,7 +40,7 @@ with Chromosome
   implicit val format: Format[Value] =
     Json.formatEnum(this)
 }
-
+*/
 
 object ACMG
 {

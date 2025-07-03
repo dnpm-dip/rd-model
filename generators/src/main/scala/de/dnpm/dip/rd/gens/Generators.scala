@@ -24,6 +24,7 @@ import de.dnpm.dip.model.{
   Id,
   Address,
   BaseVariant,
+  Chromosome,
   ExternalId,
   ExternalReference,
   FollowUp,
@@ -283,11 +284,11 @@ trait Generators
   implicit val genHGNCCoding: Gen[Coding[HGNC]] =
     Gen.oneOf(
       Seq(
-        "HGNC:20" -> "AARS1",
+        "HGNC:20"    -> "AARS1",
         "HGNC:51526" -> "AATBC",
         "HGNC:49667" -> "ABALON",
         "HGNC:17929" -> "AADAT",
-        "HGNC:21" -> "AATK",
+        "HGNC:21"    -> "AATK",
       )
       .map {
         case (code,display) =>
@@ -305,7 +306,6 @@ trait Generators
       "NC_000023.11:g.33344590_33344592=/dup",
     )
     .map(Code[HGVS.DNA](_))
-//    .map(Coding[HGVS.DNA](_))
 
   private val proteinChanges =
     Seq(
@@ -316,7 +316,6 @@ trait Generators
       "NP_003997.2:p.Val7dup",
     )
     .map(Code[HGVS.Protein](_))
-//    .map(Coding[HGVS.Protein](_))
 
 
   implicit val genAcmgCriterion: Gen[ACMG.Criterion] =
