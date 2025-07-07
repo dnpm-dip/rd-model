@@ -41,7 +41,7 @@ final case class RDDiagnosis
   id: Id[RDDiagnosis],
   patient: Reference[Patient],
   recordedOn: LocalDate,
-  onsetDate: YearMonth,
+  onsetDate: Option[YearMonth],
   familyControlLevel: Coding[RDDiagnosis.FamilyControlLevel.Value],
   verificationStatus: Coding[RDDiagnosis.VerificationStatus.Value],
   codes: NonEmptyList[Coding[RDDiagnosis.Systems]],

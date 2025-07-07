@@ -72,17 +72,6 @@ lazy val alpha_id_se = project
   )
   .dependsOn(dto_model)
 
-/*
-lazy val omim = project
-  .settings(
-    name := "omim-catalog",
-    settings,
-    libraryDependencies ++= Seq(
-      dependencies.scalatest
-    )
-  )
-  .dependsOn(dto_model)
-*/
 
 lazy val generators = project
   .settings(

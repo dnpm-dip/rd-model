@@ -215,7 +215,7 @@ trait Generators
         id,
         Reference.to(patient),
         date,
-        onsetMonth,
+        Some(onsetMonth),
         controlLevel,
         status,
         codes,
@@ -286,15 +286,14 @@ trait Generators
       Seq(
         "HGNC:20"    -> "AARS1",
         "HGNC:51526" -> "AATBC",
-        "HGNC:49667" -> "ABALON",
         "HGNC:17929" -> "AADAT",
         "HGNC:21"    -> "AATK",
       )
       .map {
-        case (code,display) =>
-          Coding[HGNC](code,display)
+        case (code,display) => Coding[HGNC](code,display)
       }
     )
+
 
   // Source: https://varnomen.hgvs.org/recommendations/DNA/variant/duplication/
   private val gDNAChanges =
