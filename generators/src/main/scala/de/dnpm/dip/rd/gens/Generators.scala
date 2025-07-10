@@ -177,7 +177,7 @@ trait Generators
       dateOfDeath,
       None,
       healthInsurance,
-      Address("12345")
+      Some(Address(Address.MunicipalityCode("12345")))
     )
 
   def genDiagnosis(
