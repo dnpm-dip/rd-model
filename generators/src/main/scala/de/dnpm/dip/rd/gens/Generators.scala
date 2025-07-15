@@ -473,10 +473,22 @@ trait Generators
 
   def genNGSReport(
     patient: Patient
-  ): Gen[RDNGSReport] =
+  ): Gen[RDNGSReport] = {
+
+    import NGSReport.Type._
+
     for {
       id  <- Gen.of[Id[RDNGSReport]]
-      typ <- Gen.of[Coding[NGSReport.Type.Value]]
+
+      typ <-
+        Gen.oneOf(
+          Array,
+          Panel,
+          Exome,
+          GenomeShortRead,
+          GenomeLongRead
+        )
+        .map(Coding(_))
 
       metaInfo <-
         for {
@@ -507,7 +519,7 @@ trait Generators
           )
         )
       )
-
+  }
 
   def genTherapyRecommendation(
     patient: Patient,
@@ -681,11 +693,9 @@ trait Generators
 
       hospitalization <-  Gen.of[Hospitalization]
 
-      gmfcsStatus <-
-        genGMFCS(patient)
+      gmfcsStatus <- genGMFCS(patient)
 
-      ngsReport <-
-        genNGSReport(patient)
+      ngsReport <- genNGSReport(patient)
 
       initBoardPlan <-
         for { 
@@ -693,7 +703,7 @@ trait Generators
         } yield RDCarePlan(
           id,
           patRef,
-          LocalDate.now.minusWeeks(2),
+          ngsReport.issuedOn minusWeeks 2,
           None,
           None,
           None,

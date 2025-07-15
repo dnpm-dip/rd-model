@@ -30,18 +30,6 @@ import play.api.libs.json.{
 }
 
 
-/*
-object Chromosome
-extends Enumeration
-with Chromosome
-{
-  val chrMT = Value
-
-  implicit val format: Format[Value] =
-    Json.formatEnum(this)
-}
-*/
-
 object ACMG
 {
 
