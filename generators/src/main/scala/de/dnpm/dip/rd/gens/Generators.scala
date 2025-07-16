@@ -482,7 +482,6 @@ trait Generators
 
       typ <-
         Gen.oneOf(
-          Array,
           Panel,
           Exome,
           GenomeShortRead,
