@@ -1,13 +1,16 @@
+// build.sbt adapted from https://github.com/pbassiner/sbt-multi-project-example/blob/master/build.sbt
 
-/*
- build.sbt adapted from https://github.com/pbassiner/sbt-multi-project-example/blob/master/build.sbt
-*/
+import scala.util.Properties.envOrElse
 
 
 name := "rd-model"
 ThisBuild / organization := "de.dnpm.dip"
 ThisBuild / scalaVersion := "2.13.16"
-ThisBuild / version      := "1.0-SNAPSHOT"
+ThisBuild / version      := envOrElse("VERSION","1.0.0")
+
+val ownerRepo  = envOrElse("REPOSITORY","dnpm-dip/rd-model").split("/")
+ThisBuild / githubOwner      := ownerRepo(0)
+ThisBuild / githubRepository := ownerRepo(1)
 
 
 //-----------------------------------------------------------------------------
@@ -24,7 +27,6 @@ lazy val global = project
      dto_model,
      hpo,
      alpha_id_se,
-//     omim,
      orphanet,
      generators,
      tests
@@ -121,13 +123,13 @@ lazy val dependencies =
   new {
     val scalatest             = "org.scalatest"          %% "scalatest"              % "3.2.18" % Test
     val scala_xml             = "org.scala-lang.modules" %% "scala-xml"              % "2.0.1"
-    val core                  = "de.dnpm.dip"            %% "core"                   % "1.0-SNAPSHOT"
-    val generators            = "de.ekut.tbi"            %% "generators"             % "1.0-SNAPSHOT"
-    val icd10gm               = "de.dnpm.dip"            %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
-    val icd_catalogs          = "de.dnpm.dip"            %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
-    val atc_impl              = "de.dnpm.dip"            %% "atc-impl"               % "1.0-SNAPSHOT" % Test
-    val atc_catalogs          = "de.dnpm.dip"            %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
-    val json_schema_validator = "com.networknt"          %  "json-schema-validator"  % "1.5.6"        % Test
+    val core                  = "de.dnpm.dip"            %% "core"                   % "1.0.0"
+    val generators            = "de.ekut.tbi"            %% "generators"             % "1.0.0"
+    val icd10gm               = "de.dnpm.dip"            %% "icd10gm-impl"           % "1.0.0" % Test
+    val icd_catalogs          = "de.dnpm.dip"            %% "icd-claml-packaged"     % "1.0.0" % Test
+    val atc_impl              = "de.dnpm.dip"            %% "atc-impl"               % "1.0.0" % Test
+    val atc_catalogs          = "de.dnpm.dip"            %% "atc-catalogs-packaged"  % "1.0.0" % Test
+    val json_schema_validator = "com.networknt"          %  "json-schema-validator"  % "1.5.6" % Test
   }
 
 
@@ -181,16 +183,16 @@ lazy val compilerOptions = Seq(
   "-Wunused:privates",
   "-Wunused:implicits",
   "-Wvalue-discard",
-
-  // Deactivated to avoid many false positives from 'evidence' parameters in context bounds
-//  "-Wunused:params",
 )
 
 
 lazy val commonSettings = Seq(
   scalacOptions ++= compilerOptions,
-  resolvers ++= Seq("Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository") ++
-    Resolver.sonatypeOssRepos("releases") ++
-    Resolver.sonatypeOssRepos("snapshots")
+  resolvers ++= Seq(
+    "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
+    Resolver.githubPackages("dnpm-dip"),
+    Resolver.githubPackages("KohlbacherLab"),
+    Resolver.sonatypeCentralSnapshots
+  )
 )
 
