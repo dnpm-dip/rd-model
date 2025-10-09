@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/dnpm-dip/rd-model/compare/v1.0.0...v1.1.0) (2025-10-09)
+
+
+### Features
+
+* Upgraded dependency versions: core, icd-10- and atc-catalogs ([9ff7615](https://github.com/dnpm-dip/rd-model/commit/9ff76159b7a64118e1a237ad9104216d63b76ab0))
+
+
+### Bug Fixes
+
+* Added missing value Variant.SegregationAnalysis 'from-both-parents' ([9ff7615](https://github.com/dnpm-dip/rd-model/commit/9ff76159b7a64118e1a237ad9104216d63b76ab0))
+
 ## 1.0.0 (2025-08-06)
 
 
