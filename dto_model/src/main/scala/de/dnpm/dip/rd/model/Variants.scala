@@ -258,17 +258,19 @@ object Variant
   extends CodedEnum("dnpm-dip/rd/variant/segregation-analysis")
   with DefaultCodeSystem
   {
-    val NotPerformed = Value("not-performed")
-    val DeNovo       = Value("de-novo")
-    val FromFather   = Value("from-father")
-    val FromMother   = Value("from-mother")
+    val NotPerformed    = Value("not-performed")
+    val DeNovo          = Value("de-novo")
+    val FromFather      = Value("from-father")
+    val FromMother      = Value("from-mother")
+    val FromBothParents = Value("from-both-parents")
 
     override val display =
       Map(
-        NotPerformed -> "not performed",
-        DeNovo       -> "de-novo",
-        FromFather   -> "Transmitted from father",
-        FromMother   -> "Transmitted from mother"
+        NotPerformed    -> "not performed",
+        DeNovo          -> "de-novo",
+        FromFather      -> "Transmitted from father",
+        FromMother      -> "Transmitted from mother",
+        FromBothParents -> "Transmitted from father and mother"
       )
     
     final class ProviderSPI extends CodeSystemProviderSPI
