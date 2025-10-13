@@ -42,7 +42,7 @@ final case class RDDiagnosis
   patient: Reference[Patient],
   recordedOn: LocalDate,
   onsetDate: Option[YearMonth],
-  familyControlLevel: Coding[RDDiagnosis.FamilyControlLevel.Value],
+  familyControlLevel: Option[Coding[RDDiagnosis.FamilyControlLevel.Value]],
   verificationStatus: Coding[RDDiagnosis.VerificationStatus.Value],
   codes: NonEmptyList[Coding[RDDiagnosis.Systems]],
   missingCodeReason: Option[Coding[RDDiagnosis.MissingCodeReason.Value]],

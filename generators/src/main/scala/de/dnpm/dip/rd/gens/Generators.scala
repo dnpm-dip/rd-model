@@ -216,7 +216,7 @@ trait Generators
         Reference.to(patient),
         date,
         Some(onsetMonth),
-        controlLevel,
+        Some(controlLevel),
         status,
         codes,
         missingCode,
