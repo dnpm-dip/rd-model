@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/dnpm-dip/rd-model/compare/v1.1.0...v1.1.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* Made Diagnosis.familyControlLevel optional for cases where no sequencing was performed ([d01a6a4](https://github.com/dnpm-dip/rd-model/commit/d01a6a4595371f8deaa8bd0119db0a59601ff2b3))
+
 ## [1.1.0](https://github.com/dnpm-dip/rd-model/compare/v1.0.0...v1.1.0) (2025-10-09)
 
 
