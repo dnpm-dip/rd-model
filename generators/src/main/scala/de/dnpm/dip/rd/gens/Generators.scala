@@ -173,8 +173,8 @@ trait Generators
     } yield Patient(
       id,
       gender,
-      birthDate,
-      dateOfDeath,
+      YearMonth.from(birthDate),
+      dateOfDeath.map(YearMonth.from),
       None,
       healthInsurance,
       Some(Address(Address.MunicipalityCode("12345")))
