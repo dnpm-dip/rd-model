@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/dnpm-dip/rd-model/compare/v1.1.1...v1.1.2) (2025-11-20)
+
+
+### Bug Fixes
+
+* bump core to 1.1.4, icd* to 1.1.2 ([de29e90](https://github.com/dnpm-dip/rd-model/commit/de29e90d377b4107a66c32ed2fd9d521e02a9290))
+* Updated packaged HPO version to 2025-10-22 ([de29e90](https://github.com/dnpm-dip/rd-model/commit/de29e90d377b4107a66c32ed2fd9d521e02a9290))
+
 ## [1.1.1](https://github.com/dnpm-dip/rd-model/compare/v1.1.0...v1.1.1) (2025-10-13)
 
 
