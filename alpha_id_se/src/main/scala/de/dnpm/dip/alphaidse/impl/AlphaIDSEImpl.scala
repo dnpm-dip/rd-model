@@ -3,6 +3,7 @@ package de.dnpm.dip.alphaidse.impl
 
 
 import cats.Applicative
+import cats.Eval
 import cats.data.NonEmptyList
 import de.dnpm.dip.util.{
   SPI,
@@ -38,7 +39,7 @@ object AlphaIDSEImpl
 
   trait Loader
   {
-    def catalogs: NonEmptyList[(String,CodeSystem[AlphaIDSE])]
+    def catalogs: NonEmptyList[(String,Eval[CodeSystem[AlphaIDSE]])]
   }
 
   trait LoaderSPI extends SPI[Loader]
@@ -48,18 +49,17 @@ object AlphaIDSEImpl
 
   class DefaultLoader extends Loader
   {
-
-    val catalogs: NonEmptyList[(String,CodeSystem[AlphaIDSE])] =
+    val catalogs: NonEmptyList[(String,Eval[CodeSystem[AlphaIDSE]])] =
       NonEmptyList
         .of("2024","2025","2026")
         .map {
           version =>
-            version -> CSVParser.read(
-              this.getClass
-                .getClassLoader
-                .getResourceAsStream(s"icd10gm${version}_alphaidse.txt"),
+            version -> Eval.later {
+              CSVParser.read(
+                this.getClass.getClassLoader.getResourceAsStream(s"icd10gm${version}_alphaidse.txt"),
                 version
-            )
+              )
+            }
         }
   }
 
@@ -94,8 +94,7 @@ object AlphaIDSEImpl
     override def latestVersion(
       implicit F: Applicative[F]
     ): F[String] =
-      versions
-        .map(_.toList.max(versionOrdering))
+      versions.map(_.toList.max(versionOrdering))
 
     override def filters(
       implicit env: Applicative[F] 
@@ -109,7 +108,7 @@ object AlphaIDSEImpl
       implicit F: Applicative[F]
     ): F[Option[CodeSystem[AlphaIDSE]]] =
       catalogs
-        .collectFirst { case (v,cs) if v == version => cs }
+        .collectFirst { case (v,cs) if v == version => cs.value }
         .pure
 
     override def latest(
@@ -119,6 +118,7 @@ object AlphaIDSEImpl
         .toList
         .maxBy(_._1)(versionOrdering)
         ._2
+        .value
         .pure
   }
 

@@ -35,20 +35,6 @@ object CSVParser
                 code = Code(csv(1)),
                 display = csv(7),
                 version = Some(version),
-/*                
-                properties =
-                  Map(
-                    AlphaIDSE.Validity       -> 0,
-                    AlphaIDSE.PrimaryCode1   -> 2,
-                    AlphaIDSE.StarCode       -> 3,
-                    AlphaIDSE.AdditionalCode -> 4,
-                    AlphaIDSE.PrimaryCode2   -> 5,
-                    AlphaIDSE.OrphaCode      -> 6
-                  )
-                  .map { 
-                    case (prop,idx) => prop.name -> Set(csv(idx)).filterNot(_.isBlank)
-                  },
-*/                  
                 properties =
                   Map(
                     AlphaIDSE.Validity       -> 0,
