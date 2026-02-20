@@ -51,7 +51,7 @@ object AlphaIDSEImpl
 
     val catalogs: NonEmptyList[(String,CodeSystem[AlphaIDSE])] =
       NonEmptyList
-        .of("2024","2025")
+        .of("2024","2025","2026")
         .map {
           version =>
             version -> CSVParser.read(

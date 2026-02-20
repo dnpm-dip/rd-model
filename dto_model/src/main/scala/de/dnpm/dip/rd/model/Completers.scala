@@ -41,6 +41,11 @@ trait Completers extends BaseCompleters
 
   protected implicit val orphaCodingCompleter: Completer[Coding[Orphanet]] = {
 
+    // Code pre-processing:
+    // Add the "ORPHA:" prefix in case it's missing, to keep flexibility in data uploads but ensure correct queriability,
+    // because if the data contained codes both with and without the prefix, in queries likes
+    // "find all patients with Orpha-Code 'ORPHA:x'", entries containing the unprefixed code "x"
+    // wouldn't match by code equality
     val addOrphaPrefix =
       (coding: Coding[Orphanet]) =>
         coding.code match { 
