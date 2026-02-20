@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.3](https://github.com/dnpm-dip/rd-model/compare/v1.1.2...v1.1.3) (2026-02-20)
+
+
+### Bug Fixes
+
+* Added Alpha-ID-SE 2026 ([8cf8c54](https://github.com/dnpm-dip/rd-model/commit/8cf8c54d5f6e74cfb184d90b5959f98bb42a54e7))
+* Added lazy-loading of Alpha-ID-SE in attempt to fix out of memory error occurring in tests ([ad23941](https://github.com/dnpm-dip/rd-model/commit/ad23941f12a1a2656b871f4753468e2da7afb3fd))
+* bump core to 1.2.1, with concommittant adaptations to generators ([8cf8c54](https://github.com/dnpm-dip/rd-model/commit/8cf8c54d5f6e74cfb184d90b5959f98bb42a54e7))
+
 ## [1.1.2](https://github.com/dnpm-dip/rd-model/compare/v1.1.1...v1.1.2) (2025-11-20)
 
 
