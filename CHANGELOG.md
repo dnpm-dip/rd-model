@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.0](https://github.com/dnpm-dip/rd-model/compare/v1.1.2...v1.2.0) (2026-04-21)
+
+
+### Features
+
+* Added RDCarePlan.boardType ([#8](https://github.com/dnpm-dip/rd-model/issues/8)) ([f499bbe](https://github.com/dnpm-dip/rd-model/commit/f499bbe9f7c4983f137f129d5f72690afa5b4805))
+
+
+### Bug Fixes
+
+* Adapted Generators, also to exclude chrMT from used Chromosome value set ([f499bbe](https://github.com/dnpm-dip/rd-model/commit/f499bbe9f7c4983f137f129d5f72690afa5b4805))
+* Added Alpha-ID-SE 2026 ([8cf8c54](https://github.com/dnpm-dip/rd-model/commit/8cf8c54d5f6e74cfb184d90b5959f98bb42a54e7))
+* Added empty Rcommendation.supportingFindings are irrelevant here ([f499bbe](https://github.com/dnpm-dip/rd-model/commit/f499bbe9f7c4983f137f129d5f72690afa5b4805))
+* Added lazy-loading of Alpha-ID-SE in attempt to fix out of memory error occurring in tests ([ad23941](https://github.com/dnpm-dip/rd-model/commit/ad23941f12a1a2656b871f4753468e2da7afb3fd))
+* bump core to 1.2.1, with concommittant adaptations to generators ([8cf8c54](https://github.com/dnpm-dip/rd-model/commit/8cf8c54d5f6e74cfb184d90b5959f98bb42a54e7))
+* Updated HPO and Orphanet codesystems ([42586aa](https://github.com/dnpm-dip/rd-model/commit/42586aafd3fa7ce2a43fb5927df677238fd4b02b))
+
 ## [1.1.2](https://github.com/dnpm-dip/rd-model/compare/v1.1.1...v1.1.2) (2025-11-20)
 
 
