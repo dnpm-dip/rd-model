@@ -24,6 +24,7 @@ import de.dnpm.dip.model.{
   Id,
   Address,
   BaseVariant,
+  CarePlan,
   Chromosome,
   ExternalId,
   ExternalReference,
@@ -293,6 +294,10 @@ trait Generators
         case (code,display) => Coding[HGNC](code,display)
       }
     )
+
+
+   implicit val genChromosome: Gen[Chromosome.Value] =
+    Gen.oneOf((Chromosome.values - Chromosome.chrMT).toSeq)
 
 
   // Source: https://varnomen.hgvs.org/recommendations/DNA/variant/duplication/
@@ -618,6 +623,7 @@ trait Generators
       id,
       Reference.to(patient),
       LocalDate.now,
+      Some(Coding(CarePlan.BoardType.TherapyBoard)),
       None,
       Some(true),
       Some(true),
@@ -703,6 +709,7 @@ trait Generators
           id,
           patRef,
           ngsReport.issuedOn minusWeeks 2,
+          Some(Coding(CarePlan.BoardType.IndicationBoard)),
           None,
           None,
           None,
