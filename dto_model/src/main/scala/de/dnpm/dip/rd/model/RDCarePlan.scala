@@ -40,8 +40,9 @@ final case class RDTherapyRecommendation
 )
 extends TherapyRecommendation
 {
-  val reason = None
-  val priority = Coding(Recommendation.Priority.One) // Irrelevant, so just set a constant
+  override val reason = None
+  override val priority = Coding(Recommendation.Priority.One) // Irrelevant, so just set a constant
+  override val supportingFindings = None
 }
 
 object RDTherapyRecommendation
@@ -60,6 +61,10 @@ final case class RDStudyEnrollmentRecommendation
   study: NonEmptyList[ExternalReference[Study,Study.Registries]]
 )
 extends StudyEnrollmentRecommendation
+{
+  override val supportingFindings = None
+}
+
 
 object RDStudyEnrollmentRecommendation
 {
@@ -122,6 +127,7 @@ final case class RDCarePlan
   id: Id[RDCarePlan],
   patient: Reference[Patient],
   issuedOn: LocalDate,
+  boardType: Option[Coding[CarePlan.BoardType.Value]],
   noSequencingPerformedReason: Option[Coding[CarePlan.NoSequencingPerformedReason.Value]],
   geneticCounselingRecommended: Option[Boolean],
   reevaluationRecommended: Option[Boolean],
