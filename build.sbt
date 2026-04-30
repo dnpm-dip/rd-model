@@ -122,7 +122,7 @@ lazy val tests = project
 lazy val dependencies =
   new {
     val scalatest             = "org.scalatest"          %% "scalatest"              % "3.2.18" % Test
-    val scala_xml             = "org.scala-lang.modules" %% "scala-xml"              % "2.0.1"
+    val scala_xml             = "org.scala-lang.modules" %% "scala-xml"              % "2.4.0"
     val core                  = "de.dnpm.dip"            %% "core"                   % "1.3.0"
     val generators            = "de.ekut.tbi"            %% "generators"             % "1.0.0"
     val icd10gm               = "de.dnpm.dip"            %% "icd10gm-impl"           % "1.1.2" % Test
