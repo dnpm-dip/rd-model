@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/dnpm-dip/rd-model/compare/v1.2.0...v1.2.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* bump scala-xml to 2.4.0 ([#9](https://github.com/dnpm-dip/rd-model/issues/9)) ([b27118d](https://github.com/dnpm-dip/rd-model/commit/b27118d4929ae6a99910eb46ff3485d9da0f2f93))
+* reverted scala-xml to 2.0.1 because out of memory error occurring in tests wasn't fixed after all ([45f53d1](https://github.com/dnpm-dip/rd-model/commit/45f53d1489bc94f72bd4a754b29536e06e1a842c))
+
 ## [1.2.0](https://github.com/dnpm-dip/rd-model/compare/v1.1.2...v1.2.0) (2026-04-21)
 
 
