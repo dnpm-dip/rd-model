@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.1](https://github.com/dnpm-dip/rd-model/compare/v1.2.0...v1.2.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* Bump core to 1.3.2; icd-10 to 1.1.4; atc to 1.1.2 ([3858252](https://github.com/dnpm-dip/rd-model/commit/38582523365c83a2ec5b97394a3ae47996550cde))
+* bump scala-xml to 2.4.0 ([#9](https://github.com/dnpm-dip/rd-model/issues/9)) ([b27118d](https://github.com/dnpm-dip/rd-model/commit/b27118d4929ae6a99910eb46ff3485d9da0f2f93))
+* reverted scala-xml to 2.0.1 because out of memory error occurring in tests wasn't fixed after all ([45f53d1](https://github.com/dnpm-dip/rd-model/commit/45f53d1489bc94f72bd4a754b29536e06e1a842c))
+* Updated HPO 2026-06-23 ([8dba0be](https://github.com/dnpm-dip/rd-model/commit/8dba0bea13f8af779af689740a37729a86f6e80b))
+* Updated ORDO 4.9 ([c442d59](https://github.com/dnpm-dip/rd-model/commit/c442d5994ca6a6c86e69b5d22299516c48fc7d02))
+
 ## [1.2.0](https://github.com/dnpm-dip/rd-model/compare/v1.1.2...v1.2.0) (2026-04-21)
 
 
