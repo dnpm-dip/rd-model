@@ -155,10 +155,8 @@ object OwlOrdoParser
           _.map {
             concept =>
               subClasses.get(concept.code) match {         
-                case Some(children) if children.nonEmpty =>
-                  concept.copy(children = Some(children)) 
-                case _ =>
-                  concept
+                case Some(children) if children.nonEmpty => concept.copy(children = Some(children)) 
+                case _ => concept
               }
           }
         )
@@ -171,7 +169,16 @@ object OwlOrdoParser
       version = theVersion,
       date = Some(dateTime),
       properties = Orphanet.properties,
-      concepts = concepts
+      concepts = concepts,
+      // Ensure lookup always uses ORPHA prefix in input
+      customConceptLookup = Some {
+        (code: Code[Orphanet]) =>
+          val prefixedCode = code match {
+            case code if code.value startsWith "ORPHA:" => code
+            case code => code.copy(value = s"ORPHA:${code.value}")
+          }
+          concepts.find(_.code == prefixedCode)
+      }
     )
 
   }
