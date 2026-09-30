@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/dnpm-dip/rd-model/compare/v1.2.1...v1.2.2) (2026-09-30)
+
+
+### Bug Fixes
+
+* Ensure that Orphanet concept lookup always uses ORPHA prefix on input code ([#11](https://github.com/dnpm-dip/rd-model/issues/11)) ([8752764](https://github.com/dnpm-dip/rd-model/commit/8752764ee1c7d5ec452eb6c3d7c03157e41e55fd))
+
 ## [1.2.1](https://github.com/dnpm-dip/rd-model/compare/v1.2.0...v1.2.1) (2026-07-14)
 
 
